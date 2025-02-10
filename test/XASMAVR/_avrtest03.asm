@@ -1,15 +1,15 @@
 ;#define XASMAVR via commandline option '/DXASMAVR'
 ;----------------------------------,
-#ifdef XASMAVR			   ;
+#ifdef XASMAVR                     ;
  .TITLE Test: The AVR(R) Instruction Set
- .PAGELENGTH(84)		   ;
- .PAGEWIDTH(115)		   ;
- .SYMBOLS			   ;
- .MODEL WORD 			   ;
- .DEVICE ATxmega384C3		   ;
-#else				   ;
- .DEVICE ATmega2560		   ;
-#endif ; XASMAVR		   ;
+ .PAGELENGTH(84)                   ;
+ .PAGEWIDTH(115)                   ;
+ .SYMBOLS                          ;
+ .MODEL WORD                       ;
+ .DEVICE ATxmega384C3              ;
+#else                              ;
+ .DEVICE ATmega2560                ;
+#endif ; XASMAVR                   ;
 ;----------------------------------'
 
 #ifndef XASMAVR
@@ -23,10 +23,10 @@
 #endif ; XASMAVR
 
 _instruction_set:
-        adc     R16, R16		      
+        adc     R16, R16                      
         add     R16, R16
         adiw    R25:R24, 63
-        adiw  	R24, 63
+        adiw    R24, 63
         and     R16, R16
         andi    R16, $FF
         asr     R18
@@ -83,7 +83,7 @@ _instruction_set:
         eor     R16, R16
         fmul    R16, R16
         fmuls   R16, R16
-        fmulsu 	R16, R16
+        fmulsu  R16, R16
         icall
         ijmp
         in      R18, 63
@@ -109,7 +109,7 @@ _instruction_set:
         lsl     R18
         lsr     R18
         mov     R16, R16
-        movw  	XH:XL, YH:YL
+        movw    XH:XL, YH:YL
         movw    X, Y             
         mul     R16, R16
         muls    R16, R16
@@ -120,7 +120,7 @@ _instruction_set:
         out     63, R18
         pop     R18
         push    R18
-;;ha;;  rcall 	-10     ;; -10-(PCw+1) won't make any sense
+;;ha;;  rcall   -10     ;; -10-(PCw+1) won't make any sense
         rcall   PC-10
         ret
         reti
