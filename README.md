@@ -26,7 +26,7 @@ Four different assemblers are currently available:
 RELEASE NOTICE  
 First release: XASMAVR Version 2.1 October 2024
 
-![screenshot](XASMAVR_01.jpg)  
+![screenshot](document/image/XASMAVR_01.jpg)  
 
 #### Build
  
