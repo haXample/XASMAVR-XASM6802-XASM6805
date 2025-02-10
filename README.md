@@ -46,7 +46,7 @@ Setting environment for using Microsoft Visual Studio 2010 x86 tools.
 C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC>NMAKE c:\temp600\__\haXASM.nmk /all 
 ```
 
-The [build process](build/VS2010build32.jpg) generates four different 32bit-Versions of haXASM:
+The [build process](document/build/VS2010build32.jpg) generates four different 32bit-Versions of haXASM:
 -	XASM8042.exe... Cross-Assembler for Intel MCS-48, 8042, UPI-C42
 -	XASM6800.exe... Macro-Assembler for Motorala MC6800/6802
 -	XASM6805.exe... Macro-Assembler for Motorola MC68HC05 (all types)
@@ -57,7 +57,7 @@ The [build process](build/VS2010build32.jpg) generates four different 32bit-Vers
 Note: When compiled with *MS Visual Studio 2019*, the executables will no longer run under Windows XP.  
       To build and run the haXASM project under another OS, some adaptations may be required.
 
-The [build process](build/VS2010build64.jpg) automatically generates 64bit-Versions of haXASM when invoked under:
+The [build process](document/build/VS2010build64.jpg) automatically generates 64bit-Versions of haXASM when invoked under:
 
 ```bld64bit
 **********************************************************************    
