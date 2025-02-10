@@ -136,7 +136,7 @@ XASMAVR [/options] srcfile.asm | srcfile.s
 .NOLIST.....................................	Suppress source lines in listing  
 .LIST ...........................................	Show source lines in listing (default)  
 
-see the [XASMAVR V2.1 - Reference Guide](XASMAVR%20V2.1%20-%20Reference%20Guide.pdf) for details
+see the [XASMAVR V2.1 - Reference Guide](document/XASMAVR%20V2.1%20-%20Reference%20Guide.pdf) for details
 
 
 
