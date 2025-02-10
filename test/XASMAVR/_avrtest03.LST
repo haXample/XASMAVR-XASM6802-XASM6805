@@ -1,0 +1,209 @@
+AVR Macro-Assembler, Version 2.1                          29/12/2024  PAGE   1
+Test: The AVR(R) Instruction Set
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                    1   ;#define XASMAVR via commandline option '/DXASMAVR'
+                                    2   ;----------------------------------,
+                                    3   #ifdef XASMAVR			   ;
+                                    4    .TITLE Test: The AVR(R) Instruction Set
+                                    5    .PAGELENGTH(84)		   ;
+                                    6    .PAGEWIDTH(115)		   ;
+                                    7    .SYMBOLS			   ;
+                                    8    .MODEL WORD 			   ;
+                                    9    .DEVICE ATxmega384C3		   ;
+                                   10   #else				   ;
+                                   12   #endif ; XASMAVR		   ;
+                                   13   ;----------------------------------'
+                                   14   
+                                   15   #ifndef XASMAVR
+                                   23   #endif ; XASMAVR
+                                   24   
+ 00000000                  :C      25   _instruction_set:
+ 00000000  1f00            :C      26           adc     R16, R16		      
+ 00000001  0f00            :C      27           add     R16, R16
+ 00000002  96cf            :C      28           adiw    R25:R24, 63
+ 00000003  96cf            :C      29           adiw  	R24, 63
+ 00000004  2300            :C      30           and     R16, R16
+ 00000005  7f0f            :C      31           andi    R16, $FF
+ 00000006  9525            :C      32           asr     R18
+ 00000007  9488            :C      33           bclr    0
+ 00000008  f920            :C      34           bld     R18, 0
+ 00000009  f408            :C      35           brbc    0, PC+2
+ 0000000a  f008            :C      36           brbs    0, PC+2
+ 0000000b  f408            :C      37           brcc    PC+2
+ 0000000c  f008            :C      38           brcs    PC+2
+ 0000000d  f7e8            :C      39           brbc    0, PC-2
+ 0000000e  f3e8            :C      40           brbs    0, PC-2
+ 0000000f  f7e8            :C      41           brcc    PC-2
+ 00000010  f3e8            :C      42           brcs    PC-2
+ 00000011  9598            :C      43           break
+ 00000012  f3e9            :C      44           breq    PC-2
+ 00000013  f7ed            :C      45           brhc    PC-2
+ 00000014  f3ed            :C      46           brhs    PC-2
+ 00000015  f7ef            :C      47           brid    PC-2
+ 00000016  f3ef            :C      48           brie    PC-2
+ 00000017  f3e8            :C      49           brLo    PC-2
+ 00000018  f3ec            :C      50           brlt    PC-2
+ 00000019  f3ea            :C      51           brmi    PC-2
+ 0000001a  f7e9            :C      52           brne    PC-2
+ 0000001b  f7ea            :C      53           brpl    PC-2
+ 0000001c  f7e8            :C      54           brsh    PC-2
+ 0000001d  f7ee            :C      55           brtc    PC-2
+ 0000001e  f3ee            :C      56           brts    PC-2
+ 0000001f  f7eb            :C      57           brvc    PC-2
+ 00000020  f3eb            :C      58           brvs    PC-2
+ 00000021  9408            :C      59           bset    0
+ 00000022  fa00            :C      60           bst     R0, 0
+ 00000023  940e 000a       :C      61           call    10
+ 00000025  940e 0000       :C      62           call    _instruction_set
+ 00000027  98f8            :C      63           cbi     31, 0
+ 00000028  7000            :C      64           cbr     R16, 255
+ 00000029  9488            :C      65           clc
+ 0000002a  94d8            :C      66           clh
+ 0000002b  94f8            :C      67           cli
+ 0000002c  94a8            :C      68           cln
+ 0000002d  2722            :C      69           clr     R18
+ 0000002e  94c8            :C      70           cls
+ 0000002f  94e8            :C      71           clt
+ 00000030  94b8            :C      72           clv
+ 00000031  9498            :C      73           clz
+ 00000032  9520            :C      74           com     R18
+ 00000033  1700            :C      75           cp      R16, R16
+ 00000034  0700            :C      76           cpc     R16, R16
+ 00000035  3f0f            :C      77           cpi     R16, 255
+ 00000036  1300            :C      78           cpse    R16, R16
+ 00000037  952a            :C      79           dec     R18
+ 00000038  95d8            :C      80           elpm
+ 00000039  9126            :C      81           elpm    R18, Z
+ 0000003a  9127            :C      82           elpm    R18, Z+
+ 0000003b  2700            :C      83           eor     R16, R16
+ 0000003c  0308            :C      84           fmul    R16, R16
+ 0000003d  0380            :C      85           fmuls   R16, R16
+ 0000003e  0388            :C      86           fmulsu 	R16, R16
+ 0000003f  9509            :C      87           icall
+ 00000040  9409            :C      88           ijmp
+ 00000041  b72f            :C      89           in      R18, 63
+AVR Macro-Assembler, Version 2.1                          29/12/2024  PAGE   2
+Test: The AVR(R) Instruction Set
+
+ LOC       OBJ                   LINE   SOURCE
+
+ 00000042  9523            :C      90           inc     R18
+ 00000043  940c 000a       :C      91           jmp     10
+ 00000045  940c 0000       :C      92           jmp     _instruction_set
+ 00000047  912c            :C      93           ld      R18,  X
+ 00000048  912d            :C      94           ld      R18,  X+
+ 00000049  912e            :C      95           ld      R18, -X
+ 0000004a  8128            :C      96           ld      R18,  Y
+ 0000004b  9129            :C      97           ld      R18,  Y+
+ 0000004c  912a            :C      98           ld      R18, -Y
+ 0000004d  8120            :C      99           ld      R18,  Z
+ 0000004e  9121            :C     100           ld      R18,  Z+
+ 0000004f  9122            :C     101           ld      R18, -Z
+ 00000050  ad2f            :C     102           ldd     R18,  Y+63
+ 00000051  ad27            :C     103           ldd     R18,  Z+63
+ 00000052  ef0f            :C     104           ldi     R16, 255
+ 00000053  9120 ffff       :C     105           lds     R18, 65535
+ 00000055  95c8            :C     106           lpm
+ 00000056  9124            :C     107           lpm     R18, Z
+ 00000057  9125            :C     108           lpm     R18, Z+
+ 00000058  0f22            :C     109           lsl     R18
+ 00000059  9526            :C     110           lsr     R18
+ 0000005a  2f00            :C     111           mov     R16, R16
+ 0000005b  01de            :C     112           movw  	XH:XL, YH:YL
+ 0000005c  01de            :C     113           movw    X, Y             
+ 0000005d  9f00            :C     114           mul     R16, R16
+ 0000005e  0200            :C     115           muls    R16, R16
+ 0000005f  9521            :C     116           neg     R18
+ 00000060  0000            :C     117           nop
+ 00000061  2b00            :C     118           or      R16, R16
+ 00000062  6f0f            :C     119           ori     R16, $FF
+ 00000063  bf2f            :C     120           out     63, R18
+ 00000064  912f            :C     121           pop     R18
+ 00000065  932f            :C     122           push    R18
+                                  123   ;;ha;;  rcall 	-10     ;; -10-(PCw+1) won't make any sense
+ 00000066  dff5            :C     124           rcall   PC-10
+ 00000067  9508            :C     125           ret
+ 00000068  9518            :C     126           reti
+                                  127   ;;ha;;  rjmp    +10     ;; +10-(PCw+1) won't make any sense
+ 00000069  c009            :C     128           rjmp    PC+10
+ 0000006a  1f22            :C     129           rol     R18
+ 0000006b  9527            :C     130           ror     R18
+ 0000006c  0b00            :C     131           sbc     R16, R16
+ 0000006d  4f0f            :C     132           sbci    R16, 255
+ 0000006e  9af8            :C     133           sbi     31, 0
+ 0000006f  99f8            :C     134           sbic    31, 0        
+ 00000070  9bf8            :C     135           sbis    31, 0        
+ 00000071  97cf            :C     136           sbiw    R25:R24, 63      
+ 00000072  97cf            :C     137           sbiw    R24, 63
+ 00000073  6f0f            :C     138           sbr     R16, 255
+ 00000074  fd20            :C     139           sbrc    R18, 0
+ 00000075  ff20            :C     140           sbrs    R18, 0
+ 00000076  9408            :C     141           sec
+ 00000077  9458            :C     142           seh
+ 00000078  9478            :C     143           sei
+ 00000079  9428            :C     144           sen
+ 0000007a  ef0f            :C     145           ser     R16
+ 0000007b  9448            :C     146           ses
+ 0000007c  9468            :C     147           set
+ 0000007d  9438            :C     148           sev
+ 0000007e  9418            :C     149           sez
+ 0000007f  9588            :C     150           sleep
+ 00000080  95e8            :C     151           spm
+ 00000081  932c            :C     152           st       X, R18
+ 00000082  932d            :C     153           st       X+,R18
+ 00000083  932e            :C     154           st      -X, R18
+ 00000084  8328            :C     155           st       Y, R18
+ 00000085  9329            :C     156           st       Y+,R18
+ 00000086  932a            :C     157           st      -Y, R18
+ 00000087  8320            :C     158           st       Z, R18
+ 00000088  9321            :C     159           st       Z+,R18
+ 00000089  9322            :C     160           st      -Z, R18
+ 0000008a  af2f            :C     161           std     Y+63, R18
+ 0000008b  af27            :C     162           std     Z+63, R18
+ 0000008c  9320 ffff       :C     163           sts     65535, R18
+ 0000008e  1b00            :C     164           sub     R16, R16
+ 0000008f  5f0f            :C     165           subi    R16, 255
+ 00000090  9522            :C     166           swap    R18
+ 00000091  2322            :C     167           tst     R18
+ 00000092  95a8            :C     168           wdr
+                                  169   ; Advanced instructions supported in some ATxmega*
+                                  170   #ifdef XASMAVR
+AVR Macro-Assembler, Version 2.1                          29/12/2024  PAGE   3
+Test: The AVR(R) Instruction Set
+
+ LOC       OBJ                   LINE   SOURCE
+
+ 00000093  945b            :C     171           des     5
+ 00000094  9519            :C     172           eicall
+ 00000095  9419            :C     173           eijmp
+ 00000096  9326            :C     174           lac     Z, R18
+ 00000097  9325            :C     175           las     Z, R18
+ 00000098  9327            :C     176           lat     Z, R18
+ 00000099  95e8            :C     177           spm     Z+
+ 0000009a  9324            :C     178           xch     Z, R18
+ 0000009b                  :C     179   _End_of_instruction_set:
+                                  180   #else                      
+                                  181   #endif ; XASMAVR                         
+                                  182   
+                                  183   ; -------------------------------------------
+                                  184   
+                                  185   .EXIT
+
+USER SYMBOLS
+
+_End_of_instruction_set . . . . . . . .  0000009B C  _instruction_set. . . . . . . . . . . .  00000000 C  
+XASMAVR . . . . . . . . . . . . . . . .  00000001 A  
+
+ Info - Memory segments organization
+        CSEG: Start = 0x00000000  End = 0x0000009B  Size = 155 word(s)
+        CSEG: Code size = 310 bytes
+
+        DSEG: Start = 0x00002000  End = 0x00002000  Size = 0 byte(s)
+        DSEG: Data size = 0 bytes
+
+        ESEG: Start = 0x00001000  End = 0x00001000  Size = 0 byte(s)
+        ESEG: Data size = 0 bytes
+
+ASSEMBLY COMPLETE,   NO ERRORS

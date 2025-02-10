@@ -1,0 +1,234 @@
+AVR Macro-Assembler, Version 2.1                          15/01/2025  PAGE   1
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                    1   ;#define XASMAVR via commandline option '/DXASMAVR'
+                                    2   ;#define XASM ;TEST
+                                    3   ;----------------------------------,
+                                    4   #ifdef XASMAVR			   ;
+                                   12   #else				   ;
+                                   13    .DEVICE ATmega2560		   ;
+                                   14    .OVERLAP			   ;
+                                   15   #endif ;XASMAVR		   	   ;
+                                   16   ;----------------------------------'
+ = fffffffc                        17   .SET	_MSET_MASK	=	~ ((1 << 0) | (1 << 1))             ; =$FC
+ 00000000  fc              :C      18   	.DB	_MSET_MASK
+ 00000000  00              :C           	.EVEN
+                                   19   	 
+ = fffffffe                        20   .set _p0 =  ((((~((((   ((((0001 )))<<((( 0000))))  ))))|((((  ((((0001 )))<<((( 0001))))   ))))  )))) ;= $FE
+ 00000001  fe              :C      21   	.DB	_p0
+ 00000001  00              :C           	.EVEN
+                                   22   
+ = fffffffc                        23   .set _p0 = (((((~((((( (((((0001 )))<<((( 0000))))) ))))|(((( (((((0001 )))<<((( 0001))))) ))))) ))))) ;= $FC
+ 00000002  fc              :C      24   	.DB	_p0
+ 00000002  00              :C           	.EVEN
+                                   25   
+ = fffffff8                        26   .SET	_MSET_MASK	=	~ ((1 << 0) | (1 << 1) | (1 << 2))  ; =$F8
+ 00000003  f8              :C      27   	.DB	_MSET_MASK
+ 00000003  00              :C           	.EVEN
+                                   28   	 
+ = fffffffe                        29   .SET	_MSET_MASK	=	( ~ (1 << 0) | (1 << 1) | (1 << 2)) ; =$F8
+ 00000004  fe              :C      30   	.DB	_MSET_MASK
+ 00000004  00              :C           	.EVEN
+                                   31   
+ = 00000007                        32   .SET	_MSET_MASK	=	   ((1 << 0) | (1 << 1) | (1 << 2)) ; =$07
+ 00000005  07              :C      33   	.DB	_MSET_MASK
+ 00000005  00              :C           	.EVEN
+                                   34   
+ = 00000010                        35   .SET	_MSET_MASK	=	~ (1 << 5) & (1 << 4)               ; =$0010
+ 00000006  0010            :C      36   	.DW	_MSET_MASK
+                                   37   
+ = ffffffff                        38   .SET	_MSET_MASK	=	~ ((1 << 5) & (1 << 4))             ; =$FFFF
+ 00000007  ffff            :C      39   	.DW	_MSET_MASK
+                                   40   
+ = 00000000                        41   .SET	_MSET_MASK	=	  (1 << 5) & (1 << 4)               ; =$0000
+ 00000008  0000            :C      42   	.DW	_MSET_MASK
+                                   43   
+                                   44   #ifdef XASMAVR
+                                  162   #else
+ = 00000007                       163   .EQU	_TCR7_		=	7
+ = 00000006                       164   .EQU	_TCR6_		=	6
+ = 00000005                       165   .EQU	_TCR5_		=	5
+ = 00000004                       166   .EQU	_TCR4_		=	4
+ = 00000003                       167   .EQU	_TCR3_		=	3
+ = 00000002                       168   .EQU	_TCR2_		=	2
+ = 00000001                       169   .EQU	_TCR1_		=	1
+ = 00000000                       170   .EQU	_TCR0_		=	0
+                                  171   
+ = 00000040                       172   .EQU	TDISABLE_IRQ	=	1 << _TCR6_	                                             ;= $40
+ = 00000010                       173   .EQU	TMODE2		=	~ (1 << _TCR5_) & (1 << _TCR4_)				     ;= $10
+ = 0000000f                       174   .EQU	TSCALE 		=	(1 << _TCR3_) | (1 << _TCR2_) | (1 << _TCR1_) | (1 << _TCR0_);= $0F
+ = 0000005f                       175   .EQU	TIMER_INIT	=	TMODE2 | TSCALE | TDISABLE_IRQ                               ;= $5F
+ 00000009  5f              :C     176   	.DB TIMER_INIT
+ 00000009  00              :C           	.EVEN
+                                  177   		
+                                  178   ;--------------------------------------------------------------------------
+                                  179   ;  7       6        5         4         3         2        1        0
+                                  180   ;  ...     ...     _NUM_LED_ _SCR_LED_ _CAP_LED_ _KYBDAT_ _SYSCLK_ _KYBCLK_
+                                  181   ;--------------------------------------------------------------------------
+ = 00000000                       182   .EQU	_KYBCLK_	=	0  		;Keyboard clock  (output)
+ = 00000001                       183   .EQU	_SYSCLK_	=	1  		;system clock    (input)
+ = 00000002                       184   .EQU	_KYBDAT_	=	2		;Keyboard data   (output)
+ = 00000003                       185   .EQU	_CAP_LED_ 	=	3		;Caps-lock LED	 (output)
+ = 00000004                       186   .EQU	_SCR_LED_ 	=	4		;Scroll-lock LED (output)
+ = 00000005                       187   .EQU	_NUM_LED_ 	=	5		;Num-lock LED	 (output)
+                                  188   ;.EQU	NC		=	6		;NC - not connected
+                                  189   ;.EQU	NC		=	7		;NC - not connected
+                                  190   
+ = 00000001                       191   .EQU	KYBCLK		=	1 << _KYBCLK_	;_KYBCLK_ byte value
+ = 00000002                       192   .EQU	SYSCLK		=	1 << _SYSCLK_	;_SYSCLK_ byte value
+ = 00000004                       193   .EQU	KYBDAT		=	1 << _KYBDAT_	;_SYSCLK_ byte value
+ = 00000008                       194   .EQU	CAP_LED		=	1 << _CAP_LED_	;_CAP_LED_ byte value
+ = 00000010                       195   .EQU	SCR_LED		=	1 << _SCR_LED_	;_SCR_LED_ byte value
+ = 00000020                       196   .EQU	NUM_LED		=	1 << _NUM_LED_	;_NUM_LED_ byte value
+                                  197   
+ = 000000c2                       198   .SET 	PORTA_MASK 	= 	~ (SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF    ;= $C2
+AVR Macro-Assembler, Version 2.1                          15/01/2025  PAGE   2
+
+ LOC       OBJ                   LINE   SOURCE
+
+ = 0000003d                       199   .SET 	PORTA_MASK 	= 	(SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF    ;= $C2
+ = ffffffc2                       200   .SET 	PORTA_MASK 	= 	~((SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF)    ;= $C2
+ = ffffffc2                       201   .SET 	PORTA_MASK 	= 	~((SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF)    ;= $C2
+                                  202   
+ 0000000a  00c2 ff00       :C     203   Portinittbl:	.DB	PORTA_MASK, $00, $00, $FF ;PORTA .. PORTD			     ;= C2, ..
+ 0000000c  003d 01         :C     204   		.DB	~ PORTA_MASK, $00, $01  ;DDRA .. DDRC				     ;= 3D, ..
+ 0000000d  00              :C           	.EVEN
+                                  205   
+                                  206   
+                                  207   ;----------------------------------------------------------------------
+                                  208   ;  7      6         5         4         3        2       1       0
+                                  209   ; _XTAT_ _NUMSTAT_ _PSHIFTL_ _PSHIFTR_ _PNUMLK_ _MSET3_ _MSET2_ _MSET1_
+                                  210   ;----------------------------------------------------------------------
+ = 00000000                       211   .EQU	_MSET1_		=	0		;Set1
+ = 00000001                       212   .EQU	_MSET2_		=	1  		;Set2
+ = 00000002                       213   .EQU	_MSET3_		=	2  		;Set3
+ = 00000003                       214   .EQU	_PNUMLK_	=	3 		;Pseudo-NUM-lock
+ = 00000004                       215   .EQU	_PSHIFTR_	=	4 		;Pseudo-Shift-rechts
+ = 00000005                       216   .EQU	_PSHIFTL_	=	5 		;Pseudo-Shift-links
+ = 00000006                       217   .EQU	_NUMSTAT_	=	6 		;Internal NUM-state
+ = 00000007                       218   .EQU	_XTAT_		=	7 		;XT-Mode(1) / AT-Mode(0)
+                                  219   
+ = fffffff8                       220   .SET	_MSET_MASK	=	~ ((1 << _MSET1_) | (1 << _MSET2_) | (1 << _MSET3_)) ; =$F8
+ 0000000e  f8              :C     221   		.DB	_MSET_MASK
+ 0000000e  00              :C           	.EVEN
+                                  222   
+ = 00000007                       223   .SET	_MSET_MASK	=	 ((1 << _MSET1_) | (1 << _MSET2_) | (1 << _MSET3_))  ; =$07
+ 0000000f  07              :C     224   		.DB	_MSET_MASK
+ 0000000f  00              :C           	.EVEN
+                                  225   
+ 00000010  f8              :C     226   MF2_F0cmd3:	.DB 	~ ((1 << _MSET1_) | (1 << _MSET2_) | (1 << _MSET3_))         ; =$F8
+ 00000010  00              :C           	.EVEN
+                                  227   
+                                  228   
+                                  229   ;----------------------------------------------------------------------							   
+                                  230   ;  7        6        5        4      3        2        1        0
+                                  231   ; _PSHFTL_ _PSHFTR_ _NUMLOK_ _SET3_ _PUTSET_ _POWRON_ _SET2_3_ _ATMODE_
+                                  232   ;----------------------------------------------------------------------							   
+ = 00000000                       233   .EQU	_ATMODE_	=	0	;1 = AT-type protocol, 0 = XT-type
+ = 00000001                       234   .EQU	_SET2_3_	=	1	;scan code set: 0 = set1, 1 = set2 or set3
+ = 00000002                       235   .EQU	_POWRON_	=	2	;Power-On reset
+ = 00000003                       236   .EQU	_PUTSET_	=	3	;F0cmd Opt=00, must send current set in use next 
+ = 00000004                       237   .EQU	_SET3_		=	4	;if _SET2_3_ = 1: 1 = scan code set3, 0 = set2
+ = 00000005                       238   .EQU	_NUMLOK_	=	5	;NumLock is active
+ = 00000006                       239   .EQU	_PSHFTR_	=	6	;system believes ShiftR-key active
+ = 00000007                       240   .EQU	_PSHFTL_	=	7	;system believes ShiftL-key active
+                                  241   
+ = 00000001                       242   .EQU	ATMODE		=	1 << _ATMODE_	;_ATMODE_ byte value
+ = 00000002                       243   .EQU	SET2_3		=	1 << _SET2_3_	;_SET2_3_ byte value
+ = 00000004                       244   .EQU	POWRON		=	1 << _POWRON_	;_POWRON_ byte value
+ = 00000010                       245   .EQU	SET3		=	1 << _SET3_	;_SET3_ byte value
+                                  246   
+ 00000011  07              :C     247   reset2:		.DB	POWRON | ATMODE | SET2_3 & ~ SET3   ;= $07
+ 00000011  00              :C           	.EVEN
+                                  248   
+ = 0000a675                       249   .SET _VAR = 0xA600*256+0x75A2>>8  ;; =0000A675 assumed (result XASMAVR=00A60075)	  
+ 00000012  a675            :C     250   	.DW LWRD(_VAR)		  ;; =    A675 XASMAVR NOT EXPECTED?!
+ 00000013  0000            :C     251   	.DW HWRD(_VAR)		  ;; =    0000 XASMAVR NOT EXPECTED?!
+                                  252   
+ = 12345678                       253   .SET _VAR = 0x1234<<16|0x5678
+ 00000014  5678            :C     254   	.DW LWRD(_VAR)		  ;; =    5678
+ 00000015  1234            :C     255   	.DW HWRD(_VAR)		  ;; =    1234
+                                  256   
+                                  257   .DSEG
+ 00000200                  :D     258   Variable:	.BYTE 4
+ 00000204                  :D     259   VarWord1:	.BYTE 2
+ 00000206                  :D     260   VarWord2:	.BYTE 2
+ 00000208                  :D     261   Result: 	.BYTE 8
+ = 00000204                       262   .EQU Address1	=VarWord1
+ = 00000206                       263   .EQU Address2	=VarWord2
+ = 00000200                       264   .EQU Address	=Variable
+ = 00004321                       265   .SET Constant	=0x4321
+                                  266   
+                                  267   .CSEG
+ = 00000010                       268   .DEF Temp	=R16
+ = 00000010                       269   .DEF TempL	=R16
+ = 00000011                       270   .DEF TempH	=R17
+ = 0000000f                       271   .DEF Flags	=R15
+ = 00000001                       272   .EQU _Flag1	=1
+ = 00000002                       273   .EQU _Flag2	=2
+ = 00000003                       274   .EQU _Flag3	=3
+AVR Macro-Assembler, Version 2.1                          15/01/2025  PAGE   3
+
+ LOC       OBJ                   LINE   SOURCE
+
+ = 00000000                       275   .EQU _signResult=0
+                                  276   
+ = 00000000                       277   .SET _VAR = ((-0-1>0)*0b1111|0-0)<<1|high(Address)&1
+ 00000016  0000            :C     278   	.DW LWRD(_VAR)		  ;; = 0000
+ 00000017  0000            :C     279   	.DW HWRD(_VAR)		  ;; = 0000
+                                  280   
+ 00000018  fff8            :C     281   	.DW 0-1<<3|high(Address)&1   ;= fffe
+ 00000019  0008            :C     282   	.DW (0-1<0)<<3|high(Address)&1   ;= fffe
+                                  283   
+ 0000001a  fff8            :C     284   	.DW 0-1<<3|2&1       ;= fff8
+ 0000001b  fff8            :C     285   	.DW (0-1<<3)|(2&1)   ;= fff8
+                                  286   
+ 0000001c  fff8            :C     287   	.DW 0-1<<3   ;= fffe
+                                  288   
+ 0000001d  ffff            :C     289   	.DW 0-1<<3|high(Address)^5   ;= ffff
+ 0000001e  ffff            :C     290   	.DW 0-1<<3|2^5   ;= ffff
+                                  291   
+ 0000001f  fffe            :C     292   	.DW 0-1<<3|high(Address)|4   ;= fffe
+ 00000020  fffe            :C     293   	.DW 0-1<<3|2|4   ;= fffe
+                                  294   
+                                  295   #endif
+                                  296   ; ----------------------------------------------------------
+                                  297   .EXIT                    
+
+USER SYMBOLS
+
+_ATMODE_. . . . . . . . . . . . . . . .  00000000 A  _CAP_LED_ . . . . . . . . . . . . . . .  00000003 A  _Flag1. . . . . . . . . . . . . . . . .  00000001 A  
+_Flag2. . . . . . . . . . . . . . . . .  00000002 A  _Flag3. . . . . . . . . . . . . . . . .  00000003 A  _KYBCLK_. . . . . . . . . . . . . . . .  00000000 A  
+_KYBDAT_. . . . . . . . . . . . . . . .  00000002 A  _MSET1_ . . . . . . . . . . . . . . . .  00000000 A  _MSET2_ . . . . . . . . . . . . . . . .  00000001 A  
+_MSET3_ . . . . . . . . . . . . . . . .  00000002 A  _MSET_MASK. . . . . . . . . . . . . . .  00000007 A  _NUM_LED_ . . . . . . . . . . . . . . .  00000005 A  
+_NUMLOK_. . . . . . . . . . . . . . . .  00000005 A  _NUMSTAT_ . . . . . . . . . . . . . . .  00000006 A  _p0 . . . . . . . . . . . . . . . . . .  FFFFFFFC A  
+_PNUMLK_. . . . . . . . . . . . . . . .  00000003 A  _POWRON_. . . . . . . . . . . . . . . .  00000002 A  _PSHFTL_. . . . . . . . . . . . . . . .  00000007 A  
+_PSHFTR_. . . . . . . . . . . . . . . .  00000006 A  _PSHIFTL_ . . . . . . . . . . . . . . .  00000005 A  _PSHIFTR_ . . . . . . . . . . . . . . .  00000004 A  
+_PUTSET_. . . . . . . . . . . . . . . .  00000003 A  _SCR_LED_ . . . . . . . . . . . . . . .  00000004 A  _SET2_3_. . . . . . . . . . . . . . . .  00000001 A  
+_SET3_. . . . . . . . . . . . . . . . .  00000004 A  _signResult . . . . . . . . . . . . . .  00000000 A  _SYSCLK_. . . . . . . . . . . . . . . .  00000001 A  
+_TCR0_. . . . . . . . . . . . . . . . .  00000000 A  _TCR1_. . . . . . . . . . . . . . . . .  00000001 A  _TCR2_. . . . . . . . . . . . . . . . .  00000002 A  
+_TCR3_. . . . . . . . . . . . . . . . .  00000003 A  _TCR4_. . . . . . . . . . . . . . . . .  00000004 A  _TCR5_. . . . . . . . . . . . . . . . .  00000005 A  
+_TCR6_. . . . . . . . . . . . . . . . .  00000006 A  _TCR7_. . . . . . . . . . . . . . . . .  00000007 A  _VAR. . . . . . . . . . . . . . . . . .  00000000 A  
+_XTAT_. . . . . . . . . . . . . . . . .  00000007 A  Address . . . . . . . . . . . . . . . .  00000200 A  Address1. . . . . . . . . . . . . . . .  00000204 A  
+Address2. . . . . . . . . . . . . . . .  00000206 A  ATMODE. . . . . . . . . . . . . . . . .  00000001 A  CAP_LED . . . . . . . . . . . . . . . .  00000008 A  
+Constant. . . . . . . . . . . . . . . .  00004321 A  Flags . . . . . . . . . . . . . . . . .  0000000F A  KYBCLK. . . . . . . . . . . . . . . . .  00000001 A  
+KYBDAT. . . . . . . . . . . . . . . . .  00000004 A  MF2_F0cmd3. . . . . . . . . . . . . . .  00000010 C  NUM_LED . . . . . . . . . . . . . . . .  00000020 A  
+PORTA_MASK. . . . . . . . . . . . . . .  FFFFFFC2 A  Portinittbl . . . . . . . . . . . . . .  0000000A C  POWRON. . . . . . . . . . . . . . . . .  00000004 A  
+reset2. . . . . . . . . . . . . . . . .  00000011 C  Result. . . . . . . . . . . . . . . . .  00000208 D  SCR_LED . . . . . . . . . . . . . . . .  00000010 A  
+SET2_3. . . . . . . . . . . . . . . . .  00000002 A  SET3. . . . . . . . . . . . . . . . . .  00000010 A  SYSCLK. . . . . . . . . . . . . . . . .  00000002 A  
+TDISABLE_IRQ. . . . . . . . . . . . . .  00000040 A  Temp. . . . . . . . . . . . . . . . . .  00000010 A  TempH . . . . . . . . . . . . . . . . .  00000011 A  
+TempL . . . . . . . . . . . . . . . . .  00000010 A  TIMER_INIT. . . . . . . . . . . . . . .  0000005F A  TMODE2. . . . . . . . . . . . . . . . .  00000010 A  
+TSCALE. . . . . . . . . . . . . . . . .  0000000F A  Variable. . . . . . . . . . . . . . . .  00000200 D  VarWord1. . . . . . . . . . . . . . . .  00000204 D  
+VarWord2. . . . . . . . . . . . . . . .  00000206 D  
+
+ Info - Memory segments organization (.OVERLAP)
+        CSEG: Start = 0x00000000  End = 0x00000021  Size = 33 word(s)
+        CSEG: Code size = 66 bytes
+
+        DSEG: Start = 0x00000200  End = 0x00000210  Size = 16 byte(s)
+        DSEG: Data size = 16 bytes
+
+        ESEG: Data size = 0 bytes
+
+ASSEMBLY COMPLETE,   NO ERRORS

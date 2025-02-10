@@ -1,0 +1,140 @@
+AVR Macro-Assembler, Version 2.1                          13/01/2025  PAGE   1
+Test: FILE/DATE/TIME - Assembler supported inbuild Macros
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                    1   ;#define XASMAVR via commandline option '/DXASMAVR'
+                                    2   ;----------------------------------,
+                                    3   #ifdef XASMAVR                     ;
+                                    4    .TITLE Test: FILE/DATE/TIME - Assembler supported inbuild Macros
+                                    5    .PAGELENGTH(84)                   ;
+                                    6    .PAGEWIDTH(120)                   ;
+                                    7    .SYMBOLS                          ;
+                                    8    .MODEL BYTE                       ;
+                                    9    .DEVICE ATxmega384C3              ;
+                                   10   #else                              ;
+                                   12   #endif ;XASMAVR                    ;
+                                   13   ;----------------------------------'
+                                   14   
+                                   15   #ifdef XASMAVR
+ 00000000  5F 61 76 72 74  :C      16           .DB __FILE__
+ 00000005  65 73 74 30 32  :C
+ 0000000A  2E 41 53 4D     :C
+                                   17                    
+ 0000000E  31 33 2F 30 31  :C      18           .DB __DATE__
+ 00000013  2F 32 30 32 35  :C
+                                   19   
+ 00000018  31 38 3A 35 35  :C      20           .DB __TIME__
+ 0000001D  3A 30 32        :C
+                                   21   
+                                   22   	.DB '13/01/2025', '18:55:02', \
+                                        	    0x00
+ 00000020  31 33 2F 30 31  :C   
+ 00000025  2F 32 30 32 35  :C
+ 0000002A  31 38 3A 35 35  :C
+ 0000002F  3A 30 32 00     :C
+ 00000033  00              :C           	.EVEN
+                                   23   
+ 00000034  30 31 2F 31 33  :C      24           .DB "__MONTH__", '/', "__DAY__", '/', "__YEAR__"
+ 00000039  2F 32 30 32 35  :C
+                                   25   
+ 0000003E  31 37 3A 35 35  :C      26           .DB "__HOUR__", ':', "__MINUTE__", ':', "__SECOND__"
+ 00000043  3A 30 32        :C
+                                   27   
+ 00000046  0D              :C      28           .DB __DAY__
+ 00000047  00              :C           	.EVEN
+ 00000048  31 33           :C      29           .DB "__DAY__"
+                                   30   
+ 0000004A  01              :C      31           .DB __MONTH__
+ 0000004B  00              :C           	.EVEN
+ 0000004C  30 31           :C      32           .DB "__MONTH__"
+                                   33   
+ 0000004E  0015            :C      34           .DW __CENTURY__
+ 00000050  32 31           :C      35           .DB "__CENTURY__"
+                                   36   
+ 00000052  07E9            :C      37           .DW __YEAR__                                           
+ 00000054  32 30 32 35     :C      38           .DB "__YEAR__"
+                                   39   
+ 00000058  11              :C      40           .DB __HOUR__ 
+ 00000059  00              :C           	.EVEN
+ 0000005A  31 37           :C      41           .DB "__HOUR__"
+                                   42   
+ 0000005C  37              :C      43           .DB __MINUTE__
+ 0000005D  00              :C           	.EVEN
+ 0000005E  35 35           :C      44           .DB "__MINUTE__"
+                                   45   
+ 00000060  02              :C      46           .DB __SECOND__
+ 00000061  00              :C           	.EVEN
+ 00000062  30 32           :C      47           .DB "__SECOND__"
+                                   48   
+                                   49           ;.DB __LINE__   ; Integer, not implemted
+                                   50   #else
+                                   70   #endif ;XASMAVR
+                                   71   
+                                   72   #ifdef XASMAVR
+                                   73   ; -------------------------------------------
+                                   74   .SUBTTL Hex-file "_avrtest02.HEX" (example)
+                                   75   .EJECT
+AVR Macro-Assembler, Version 2.1                          13/01/2025  PAGE   2
+Test: FILE/DATE/TIME - Assembler supported inbuild Macros
+Hex-file "_avrtest02.HEX" (example)
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                   76   ; -------------------------------------------
+                                   77   /*                                           |
+                                   78    :020000020000FC                             |
+                                   79    :100000005F6176727465737430322E41534D3235B0 | 
+                                   80    :100010002F31322F3230323431343A35303A3039B0 | 
+                                   81    :1000200032352F31322F3230323431343A35303AA2 | 
+                                   82    :100030003039000031322F32352F32303234313303 | 
+                                   83    :100040003A35303A3039190032350C00313215006A | 
+                                   84    :100050003231E807323032340D003133320035307E |
+                                   85    :04006000090030392A			     |
+                                   86    :00000001FF				     |
+                                   87   */                                           |
+                                   88   ; -------------------------------------------
+                                   89   
+                                   90   ; --------------------------------------------------------------------------
+                                   91   .SUBTTL Bin-file "_avrtest02.BIN", ascii-dump (ATxmega384C3 384K example)
+                                   92   .EJECT
+AVR Macro-Assembler, Version 2.1                          13/01/2025  PAGE   3
+Test: FILE/DATE/TIME - Assembler supported inbuild Macros
+Bin-file "_avrtest02.BIN", ascii-dump (ATxmega384C3 384K example)
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                   93   ; --------------------------------------------------------------------------
+                                   94   /*                                                                          |
+                                   95   00000000  5F 61 76 72 74 65 73 74-30 32 2E 41 53 4D 32 35  _avrtest02.ASM25 |
+                                   96   00000010  2F 31 32 2F 32 30 32 34-31 34 3A 35 30 3A 30 39  /12/202414:50:09 |
+                                   97   00000020  32 35 2F 31 32 2F 32 30-32 34 31 34 3A 35 30 3A  25/12/202414:50: |
+                                   98   00000030  30 39 00 00 31 32 2F 32-35 2F 32 30 32 34 31 33  09..12/25/202413 |
+                                   99   00000040  3A 35 30 3A 30 39 19 00-32 35 0C 00 31 32 15 00  :50:09..25..12.. |
+                                  100   00000050  32 31 E8 07 32 30 32 34-0D 00 31 33 32 00 35 30  21..2024..132.50 |
+                                  101   00000060  09 00 30 39 FF FF FF FF-FF FF FF FF FF FF FF FF  ..09............ |
+                                  102   00000070  FF FF FF FF FF FF FF FF-FF FF FF FF FF FF FF FF  ................ |
+                                  103     ....  								    |
+                                  104   									    |
+                                  105   0005FFE0  FF FF FF FF FF FF FF FF-FF FF FF FF FF FF FF FF  ................ |
+                                  106   0005FFF0  FF FF FF FF FF FF FF FF-FF FF FF FF FF FF FF FF  ................ |
+                                  107   */									    |
+                                  108   ; --------------------------------------------------------------------------
+                                  109   #endif ;XASMAVR
+                                  110   .EXIT
+
+USER SYMBOLS
+
+xasmavr . . . . . . . . . . . . . . . .  00000001 A  
+
+ Info - Memory segments organization
+        CSEG: Start = 0x00000000  End = 0x00000064  Size = 100 byte(s)
+        CSEG: Code size = 100 bytes
+
+        DSEG: Start = 0x00002000  End = 0x00002000  Size = 0 byte(s)
+        DSEG: Data size = 0 bytes
+
+        ESEG: Start = 0x00001000  End = 0x00001000  Size = 0 byte(s)
+        ESEG: Data size = 0 bytes
+
+ASSEMBLY COMPLETE,   NO ERRORS

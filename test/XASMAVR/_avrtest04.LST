@@ -1,0 +1,170 @@
+AVR Macro-Assembler, Version 2.1                          29/12/2024  PAGE   1
+Test: Assembler supported inbuild functions
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                    1   ;#define XASMAVR via commandline option '/DXASMAVR'
+                                    2   ;----------------------------------,
+                                    3   #ifdef XASMAVR			   ;
+                                    4    .TITLE Test: Assembler supported inbuild functions
+                                    5    .PAGELENGTH(84)		   ;
+                                    6    .PAGEWIDTH(130)		   ;
+                                    7    .SYMBOLS			   ;
+                                    8    .MODEL BYTE 			   ;
+                                    9    .DEVICE ATxmega384C3		   ;
+                                   10   #else				   ;
+                                   12   #endif ;XASMAVR		   	   ;
+                                   13   ;----------------------------------'
+                                   14   
+ 00000000  EF EF           :C      15           .DB LOW  (0x89ABCDEF), 0x89ABCDEF & 0xEF         ; Bits [ 7: 0]
+ 00000002  CD CD           :C      16           .DB HIGH (0x89ABCDEF), (0x89ABCDEF >>  8) & 0xFF ; Bits [15: 8]
+ 00000004  CD CD           :C      17           .DB BYTE2(0x89ABCDEF), (0x89ABCDEF >>  8) & 0xFF ; Bits [15: 8]
+ 00000006  AB AB           :C      18           .DB BYTE3(0x89ABCDEF), (0x89ABCDEF >> 16) & 0xFF ; Bits [23:16]
+ 00000008  89 89           :C      19           .DB BYTE4(0x89ABCDEF), (0x89ABCDEF >> 24) & 0xff ; Bits [31:24]
+ 0000000A  CDEF            :C      20           .DW LWRD (0x89ABCDEF), 0x89ABCDEF & 0xFFFF       ; Bits [15: 0]	    
+ 0000000C  CDEF            :C
+ 0000000E  89AB            :C      21           .DW HWRD (0x89ABCDEF), 0x89ABCDEF >> 16	         ; Bits [31:16]	         
+ 00000010  89AB            :C
+                                   22   
+                                   23   #ifdef XASMAVR
+                                   24    ; See Microchip AVR Assembler Manual 2017 Chapt 7.1:
+                                   25    ; "PAGE(expression) returns bits 16-21 of an expression"
+ 00000012  002B            :C      26     	.DW PAGE(0x89ABCDEF), (0x89ABCDEF & 0x003F0000) >> 16 ; Bits [21:16]        
+ 00000014  002B            :C
+ 00000016  0034            :C      27     	.DW PAGE(0x12345678), (0x12345678 & 0x003F0000) >> 16 ; Bits [21:16]             
+ 00000018  0034            :C
+                                   28   #else
+                                   29   #endif ;XASMAVR
+                                   30   										     
+                                   31   #ifdef XASMAVR
+ 0000001A  01 01           :C      32   	.DB EXP2(0),  1		  
+ 0000001C  80 80           :C      33   	.DB EXP2(7),  128	  
+ 0000001E  0100            :C      34   	.DW EXP2(8),  256	  
+ 00000020  0100            :C
+ 00000022  8000            :C      35   	.DW EXP2(15), 32768                                                             
+ 00000024  8000            :C
+ 00000026  00010000        :C      36   	.DD EXP2(16), 65536                                                            
+ 0000002A  00010000        :C
+ 0000002E  00800000        :C      37   	.DD EXP2(23), 8388608	  
+ 00000032  00800000        :C
+ 00000036  01000000        :C      38   	.DD EXP2(24), 16777216 
+ 0000003A  01000000        :C
+ 0000003E  80000000        :C      39   	.DD EXP2(31), 2147483648  
+ 00000042  80000000        :C
+ 00000046  0000000100000000:C      40   	.DQ EXP2(32), 4294967296  
+ 0000004E  0000000100000000:C
+ 00000056  0000008000000000:C      41   	.DQ EXP2(39), 549755813888  
+ 0000005E  0000008000000000:C
+ 00000066  0000800000000000:C      42   	.DQ EXP2(47), 140737488355328  
+ 0000006E  0000800000000000:C
+ 00000076  0080000000000000:C      43   	.DQ EXP2(55), 36028797018963968  
+ 0000007E  0080000000000000:C
+ 00000086  8000000000000000:C      44   	.DQ EXP2(63), 9223372036854775808  
+ 0000008E  8000000000000000:C
+ 00000096  0000000000000000:C      45   	.DQ EXP2(64), 18446744073709551616 ; Out of range
+ 0000009E  0000000000000000:C
+                                   46   #else
+                                   47   #endif ;XASMAVR
+                                   48   
+                                   49   #ifdef XASMAVR
+ 000000A6  40 40           :C      50           .DB LOG2(0),                    64 ; Illegal, out of range
+ 000000A8  00 00           :C      51           .DB LOG2(1),                     0
+ 000000AA  07 07           :C      52           .DB LOG2(128),                   7
+ 000000AC  0F 0F           :C      53           .DB LOG2(32768),     		15
+ 000000AE  10 10           :C      54           .DB LOG2(65536),     		16
+ 000000B0  17 17           :C      55           .DB LOG2(8388608),     		23
+ 000000B2  18 18           :C      56           .DB LOG2(16777216),     	24
+ 000000B4  1F 1F           :C      57           .DB LOG2(2147483648),     	31
+ 000000B6  20 20           :C      58           .DB LOG2(4294967296),     	32
+ 000000B8  27 27           :C      59           .DB LOG2(549755813888),     	39
+ 000000BA  2F 2F           :C      60           .DB LOG2(140737488355328),      47
+ 000000BC  37 37           :C      61           .DB LOG2(36028797018963968),    55
+ 000000BE  3F 3F           :C      62           .DB LOG2(9223372036854775808),  63
+ 000000C0  40 40           :C      63           .DB LOG2(18446744073709551616),	64
+                                   64   #else                         			
+                                   65   #endif ;XASMAVR
+                                   66   
+AVR Macro-Assembler, Version 2.1                          29/12/2024  PAGE   2
+Test: Assembler supported inbuild functions
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                   67   ; -------------------------------------------
+                                   68   #ifdef XASMAVR ;
+                                   69   .SUBTTL Floating point 1.7 and absolute value
+                                   70   .EJECT
+AVR Macro-Assembler, Version 2.1                          29/12/2024  PAGE   3
+Test: Assembler supported inbuild functions
+Floating point 1.7 and absolute value
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                   71   ; -------------------------------------------
+ 000000C2  0001            :C      72   	.DW     INT(1.780029)
+ 000000C4  FFFF            :C      73           .DW     INT(-1.780029)
+                                   74   
+ 000000C6  000BE6E0        :C      75           .DD     FRAC(1.780000)          ;; = 780000 
+ 000000CA  E6E0            :C      76   	.DW     FRAC(1.780000) & 0xFFFF ;; =  59104(!)
+                                   77   
+ 000000CC  49 C9 B6 36     :C      78           .DB     Q7(0.575), Q7(1.575), Q7(-0.575), Q7(-1.575)
+ 000000D0  4999            :C      79           .DW     Q15(0.575)     
+ 000000D2  32 B2           :C      80           .DB     Q7 (0.390625),  Q7(1.390625)  
+ 000000D4  B200            :C      81           .DW     Q15(1.390625)  
+ 000000D6  CE 4E           :C      82           .DB     Q7 (-0.390625), Q7(-1.390625) 
+ 000000D8  CE00            :C      83           .DW     Q15(-0.390625) 
+ 000000DA  4E CE           :C      84           .DB     Q7 (0.609375),  Q7(1.609375)  
+ 000000DC  4E00            :C      85           .DW     Q15(0.609375)  
+ 000000DE  6C EC           :C      86           .DB     Q7 (0.85), Q7(1.85)   ;; = $6C (->0.6C = 1.110 1100)
+ 000000E0  ECCC            :C      87           .DW     Q15(1.85)             ;; = $EC (->1.6C = 1.110 1100)
+                                   88   
+                                   89   
+ 000000E2  50 B0           :C      90           .DB     Q7(0.625), Q7(-0.625) ;; = $50,  (NOT $50) +1
+ 000000E4  00B0            :C      91           .DW     Q7(1.375)             
+                                   92   
+ 000000E6  00E8            :C      93           .DW     Q7(1.8125)            ;; = $E8
+ 000000E8  80 80           :C      94           .DB     Q7(1.0), Q7(-1.0)     ;; = $80, $80
+ 000000EA  8000            :C      95           .DW     Q15(-1.0), Q15(1.0)   ;; = $8000, $8000
+ 000000EC  8000            :C
+                                   96   
+ 000000EE  63 E3           :C      97           .DB     Q7 (0.78), Q7(1.78)
+ 000000F0  E3D7            :C      98           .DW     Q15(1.780029)   ;; = (nearest representation of 1.78 in memory)
+ 000000F2  63D7            :C      99           .DW     Q15(0.780029)
+ 000000F4  EEB1            :C     100           .DW     Q15(1.86478)
+ 000000F6  0000291A        :C     101   	.DD     Q15(0.321117799673)   ;; = $291A (=10522)
+                                  102   
+ 000000FA  7F FF 81 01     :C     103   	.DB     Q7(0.9921875), Q7(1.9921875), Q7(-0.9921875), Q7(-1.9921875)
+ 000000FE  7FFF            :C     104   	.DW     Q15(0.999969482421875)
+                                  105   
+                                  106    ; Absolute value of a constant expression
+ 00000100  007B            :C     107           .DW     ABS(123)        ;; = |$7B|
+ 00000102  007B            :C     108           .DW     ABS(-123)       ;; = |$7B|
+                                  109   
+                                  110    ; String length in bytes and in words
+ 00000104  21 11           :C     111   	.DB	STRLEN_IN_BYTES, STRLEN_IN_WORDS
+ = 00000021                       112   .EQU STRLEN_IN_BYTES = STRLEN("123456789012345678901234567890123")
+ = 00000011                       113   .EQU STRLEN_IN_WORDS = STRLEN_IN_BYTES / 2 + STRLEN_IN_BYTES % 2
+ 00000106  01 00           :C     114         	.DB STRLEN("a"), STRLEN("")
+                                  115   
+                                  116   #else                         			
+                                  117   #endif ;XASMAVR
+                                  118   
+                                  119   ; -------------------------------------------
+                                  120   
+                                  121   .EXIT
+
+USER SYMBOLS
+
+STRLEN_IN_BYTES . . . . . . . . . . . .  00000021 A  STRLEN_IN_WORDS . . . . . . . . . . . .  00000011 A  
+XASMAVR . . . . . . . . . . . . . . . .  00000001 A  
+
+ Info - Memory segments organization
+        CSEG: Start = 0x00000000  End = 0x00000108  Size = 264 byte(s)
+        CSEG: Code size = 264 bytes
+
+        DSEG: Start = 0x00002000  End = 0x00002000  Size = 0 byte(s)
+        DSEG: Data size = 0 bytes
+
+        ESEG: Start = 0x00001000  End = 0x00001000  Size = 0 byte(s)
+        ESEG: Data size = 0 bytes
+
+ASSEMBLY COMPLETE,   NO ERRORS

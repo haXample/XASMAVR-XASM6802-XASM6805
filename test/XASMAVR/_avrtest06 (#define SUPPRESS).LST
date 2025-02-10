@@ -1,0 +1,29 @@
+AVR Macro-Assembler, Version 2.1                          26/12/2024  PAGE   1
+
+ LOC       OBJ                   LINE   SOURCE
+
+                                    1   ;#define XASMAVR
+                                    2   ;----------------------------------,
+                                    3   #ifdef XASMAVR			   ;
+                                   10   #else				   ;
+                                   11    .DEVICE ATmega2560		   ;
+                                   12   #endif ;XASMAVR		   	   ;
+                                   13   ;----------------------------------'
+ = 00000000                        14   #define SUPPRESS ;; Suppress all
+                                   15   #ifndef SUPPRESS
+                                  314   #endif ;SUPPRESS
+                                  315   .EXIT
+
+USER SYMBOLS
+
+SUPPRESS. . . . . . . . . . . . . . . .  00000001 A  
+
+ Info - Memory segments organization
+        CSEG: Code size = 0 bytes
+
+        DSEG: Start = 0x00000200  End = 0x00000200  Size = 0 byte(s)
+        DSEG: Data size = 0 bytes
+
+        ESEG: Data size = 0 bytes
+
+ASSEMBLY COMPLETE,   NO ERRORS
