@@ -1,0 +1,572 @@
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   1
+Test: MC6800/6802 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+ = 00000001                 1   #define	XASM6802
+                            2   ;------------------------------------------,
+                            3   #ifdef XASM6802			           ;
+                            4    .TITLE Test: MC6800/6802 Instruction set
+                            5    .PAGELENGTH(84)		           ;
+                            6    .PAGEWIDTH(130)		           ;
+                            7    .SYMBOLS			           ;
+                            8   #endif ;XASM6802	   	           ;
+                            9   ;------------------------------------------'
+                           10   .LISTMAC
+                           11   
+                           12   ;------------------------------------------------------------------------------
+                           13   ;
+                           14   ; Example: MC6802 Minimum System Layout
+                           15   ;
+                           16   ; Working storage definitions (Direct Page $0..$FF)
+                           17   ;
+ = 00000000                18   RAMSTART	EQU	$0000	;User scratchpad RAM
+ = 00000080                19   RAM_SIZE	SET	128
+                           20   
+ = 00000060                21   STACK		EQU	RAMSTART+(RAM_SIZE-STACK_SIZE)
+ = 00000020                22   STACK_SIZE	EQU	32	;Stack size (64 bytes)
+                           23   
+ = 00001000                24   ROMSTART	EQU	$1000	;ROM Start
+ = 00000400                25   ROM_SIZE	EQU	1024	;1K 
+                           26   
+ = 000013FE                27   RESET		EQU	ROMSTART+ROM_SIZE-2
+                           28   
+                           29   .MACRO miniSystem
+                           30   	ORG RAMSTART
+                           31   	RMB	RAM_SIZE - STACK_SIZE
+                           32   ;      	. . . . . . . . . . . . . . . . . . . . . . . . . .
+                           33   	ORG STACK	    ; Program STACK ($00C0 .. 00FF)
+                           34   	RMB	STACK_SIZE  ; 64 bytes user stack area
+                           35   ;	. . . . . . . . . . . . . . . . . . . . . . . . . . 
+                           36   
+                           37   RAMEND	EQU  	*   ; $007F last location of on-chip-RAM
+                           38   ;
+                           39   	ORG ROMSTART
+                           40   .ENDM
+                           41   
+                           42   ;------------------------------------------------------------------------------
+                           43   ;
+ 0000                  +   44   	MINISYSTEM
+ 0000                  +   45   	ORG RAMSTART
+ 0000                  +   46   	RMB	RAM_SIZE - STACK_SIZE
+ 0060                  +   47   	ORG STACK     
+ 0060                  +   48   	RMB	STACK_SIZE  
+                       +   49   
+ = 00000080            +   50   RAMEND	EQU  	*   
+ 1000                  +   51   	ORG ROMSTART
+                           52   ;
+                           53   ;			Info String
+ 1000  4D 43 36 38 30      54   info	FCB	"MC6800/6802 Instruction Set"
+ 1005  30 2F 36 38 30  
+ 100A  32 20 49 6E 73  
+ 100F  74 72 75 63 74  
+ 1014  69 6F 6E 20 53  
+ 1019  65 74           
+ = 0000001B                55   INFO_LEN EQU * - info
+                           56   		 
+ 101B                      57   _234567890123456789012345678901234567890: ; 40 chars max:	     
+                           58   
+                           59   .EJECT
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   2
+Test: MC6800/6802 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                           60   ;------------------------------------------------------------------------------
+                           61   ;
+                           62   ;		 MC6800 Instruction Set
+                           63   ;
+ 101B                      64   MC6800_instructions:
+ 101B  1B                  65   	ABA			;= 1B
+                           66   
+ 101C  89 25               67    	ADCA 	#$25		;= 89
+ 101E  99 25               68    	ADCA 	$25		;= 99
+ 1020  A9 10               69    	ADCA 	$10,X		;= A9  
+ 1022  A9 20               70    	ADCA 	STACK_SIZE,X	;= A9  
+ 1024  A9 00               71    	ADCA 	,X		;= A9  
+ 1026  A9 00               72    	ADCA 	X		;= A9  
+ 1028  B9 10 00            73    	ADCA 	ROMSTART	;= B9
+                           74   
+ 102B  C9 25               75    	ADCB 	#$25	;= C9
+ 102D  D9 25               76    	ADCB 	$25	;= D9
+ 102F  E9 10               77    	ADCB 	$10,X	;= E9
+ 1031  F9 10 00            78    	ADCB 	$1000	;= F9
+                           79   
+ 1034  8B 25               80    	ADDA 	#$25	;= 8B
+ 1036  9B 25               81    	ADDA 	$25	;= 9B
+ 1038  AB 10               82    	ADDA 	$10,X	;= AB  
+ 103A  BB 10 00            83    	ADDA 	$1000	;= BB
+                           84   
+ 103D  CB 25               85    	ADDB 	#$25	;= CB
+ 103F  DB 25               86    	ADDB 	$25	;= DB
+ 1041  EB 10               87    	ADDB 	$10,X	;= EB
+ 1043  FB 10 00            88    	ADDB 	$1000	;= FB
+                           89   
+ 1046  84 25               90    	ANDA 	#$25	;= 84
+ 1048  94 25               91    	ANDA 	$25	;= 94
+ 104A  A4 10               92    	ANDA 	$10,X	;= A4  
+ 104C  B4 10 00            93    	ANDA 	$1000	;= B4
+ 104F  C4 25               94    	ANDB 	#$25	;= C4
+ 1051  D4 25               95    	ANDB 	$25	;= D4
+ 1053  E4 10               96    	ANDB 	$10,X	;= E4
+ 1055  F4 10 00            97    	ANDB 	$1000	;= F4
+                           98   
+ 1058  48                  99   	ASLA		;= 48
+ 1059  58                 100   	ASLB		;= 58
+ 105A  68 10              101   	ASL 	$10,X  	;= 68
+ 105C  78 10 00           102   	ASL 	$1000  	;= 78
+                          103   
+ 105F  47                 104   	ASRA		;= 47
+ 1060  57                 105   	ASRB		;= 57
+ 1061  67 10              106   	ASR 	$10,X  	;= 67
+ 1063  77 10 00           107   	ASR 	$1000  	;= 77
+                          108   
+ 1066  24 00              109    	BCC	*+2	;= 24
+ 1068  25 00              110    	BCS	*+2	;= 25
+ 106A  24 AF              111    	BCC	MC6800_instructions	;= 24
+ 106C  25 AD              112    	BCS	MC6800_instructions	;= 25
+ 106E  27 FE              113    	BEQ	*	;= 27
+ 1070  2C 00              114    	BGE	*+2	;= 2C
+ 1072  2E FE              115   	BGT	*	;= 2E
+ 1074  22 00              116    	BHI	*+2	;= 22
+ 1076  22 26              117    	BHI	_l1	;= 22
+                          118    	
+ 1078  85 25              119    	BITA 	#$25	;= 85
+ 107A  95 25              120    	BITA 	$25	;= 95
+ 107C  A5 10              121   	BITA 	$10,X	;= A5  
+ 107E  B5 10 00           122    	BITA 	$1000	;= B5
+ 1081  C5 25              123    	BITB 	#$25	;= C5
+ 1083  D5 25              124    	BITB 	$25	;= D5
+ 1085  E5 10              125   	BITB 	$10,X	;= E5
+ 1087  F5 10 00           126    	BITB 	$1000	;= F5
+                          127    	
+ 108A  2F 00              128    	BLE	*+2	;= 2F
+ 108C  23 00              129    	BLS	*+2	;= 23
+ 108E  2D 00              130   	BLT	*+2	;= 2D
+ 1090  2B 00              131    	BMI	*+2	;= 2B
+ 1092  26 00              132    	BNE	*+2	;= 26
+ 1094  2A 0D              133    	BPL	*+15	;= 2A
+ 1096  20 0D              134   	BRA	*+15	;= 20
+ 1098  8D 0D              135    	BSR	*+15	;= 8D
+ 109A  28 0D              136    	BVC	*+15	;= 28
+ 109C  29 0D              137    	BVS	*+15	;= 29
+                          138    	
+                          139   .EJECT
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   3
+Test: MC6800/6802 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+ 109E  11                 140   _l1:	CBA		;= 11
+ 109F  0C                 141   	CLC		;= 0C
+ 10A0  0E                 142   	CLI		;= 0E
+                          143   
+ 10A1  4F                 144    	CLRA		;= 4F
+ 10A2  5F                 145    	CLRB		;= 5F
+ 10A3  6F 10              146    	CLR 	$10,X	;= 6F
+ 10A5  7F 10 00           147    	CLR 	$1000	;= 7F
+                          148   	
+ 10A8  0A                 149    	CLV		;= 0A
+                          150    	
+ 10A9  81 25              151    	CMPA 	#$25	;= 81
+ 10AB  91 25              152    	CMPA 	$25	;= 91
+ 10AD  A1 10              153   	CMPA 	$10,X	;= A1  
+ 10AF  B1 10 00           154    	CMPA 	$1000	;= B1
+ 10B2  C1 25              155    	CMPB 	#$25	;= C1
+ 10B4  D1 25              156    	CMPB 	$25	;= D1
+ 10B6  E1 10              157   	CMPB 	$10,X	;= E1
+ 10B8  F1 10 00           158    	CMPB 	$1000	;= F1
+                          159    	
+ 10BB  43                 160    	COMA		;= 43
+ 10BC  53                 161    	COMB		;= 53
+ 10BD  63 10              162   	COM 	$10,X	;= 63
+ 10BF  73 10 00           163    	COM 	$1000	;= 73
+                          164    	
+ 10C2  8C 00 25           165    	CPX 	#$25	;= 8C
+ 10C5  9C 25              166    	CPX 	$25	;= 9C
+ 10C7  AC 10              167   	CPX 	$10,X	;= AC  
+ 10C9  BC 10 00           168    	CPX 	$1000	;= BC
+                          169    	
+ 10CC  19                 170    	DAA		;= 19
+                          171    	
+ 10CD  4A                 172   	DECA		;= 4A
+ 10CE  5A                 173   	DECB		;= 5A
+ 10CF  6A 10              174   	DEC 	$10,X	;= 6A
+ 10D1  7A 10 00           175   	DEC 	$1000	;= 7A
+                          176   
+ 10D4  34                 177    	DES		;= 34
+ 10D5  09                 178    	DEX		;= 09
+                          179    	
+                          180   .EJECT
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   4
+Test: MC6800/6802 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+ 10D6  88 25              181    	EORA 	#$25	;= 88
+ 10D8  98 25              182   	EORA 	$25	;= 98
+ 10DA  A8 10              183    	EORA 	$10,X	;= A8  
+ 10DC  B8 10 00           184    	EORA 	$1000	;= B8
+ 10DF  C8 25              185    	EORB 	#$25	;= C8
+ 10E1  D8 25              186   	EORB 	$25	;= D8
+ 10E3  E8 10              187    	EORB 	$10,X	;= E8
+ 10E5  F8 10 00           188    	EORB 	$1000	;= F8
+                          189    		
+ 10E8  4C                 190    	INCA		;= 4C
+ 10E9  5C                 191   	INCB		;= 5C
+ 10EA  6C 10              192    	INC 	$10,X	;= 6C
+ 10EC  7C 10 00           193    	INC 	$1000	;= 7C
+                          194    	
+ 10EF  31                 195    	INS		;= 31
+ 10F0  08                 196   	INX		;= 08
+                          197    	
+ 10F1  6E 10              198    	JMP	$10,X	;= 6E
+ 10F3  7E 10 00           199    	JMP	$1000	;= 7E
+ 10F6  7E 11 5B           200    	JMP	procRts	;= 7E
+                          201    	
+ 10F9  AD 10              202   	JSR	$10,X 	;= AD
+ 10FB  BD 10 00           203    	JSR	$1000	;= BD
+ 10FE  BD 11 5B           204    	JSR	procRts	;= BD
+                          205    	
+ 1101  86 25              206    	LDAA 	#$25	;= 86
+ 1103  96 25              207    	LDAA 	$25	;= 96
+ 1105  A6 10              208   	LDAA 	$10,X	;= A6  
+ 1107  B6 10 00           209   	LDAA 	$1000	;= B6  
+ 110A  C6 25              210    	LDAB 	#$25	;= C6
+ 110C  D6 25              211    	LDAB 	$25	;= D6
+ 110E  E6 10              212    	LDAB 	$10,X	;= E6
+ 1110  F6 10 00           213    	LDAB 	$1000	;= F6
+                          214   
+ 1113  8E 10 00           215    	LDS 	#$1000	;= 8E
+ 1116  9E 25              216    	LDS 	$25	;= 9E
+ 1118  AE 10              217    	LDS 	$10,X	;= AE 
+ 111A  BE 10 00           218    	LDS 	$1000	;= BE
+                          219   
+ 111D  CE 10 00           220    	LDX 	#$1000	;= CE
+ 1120  DE 25              221    	LDX 	$25	;= DE
+ 1122  EE 10              222    	LDX 	$10,X	;= EE
+ 1124  FE 10 00           223    	LDX 	$1000	;= FE
+                          224   
+ 1127  44                 225    	LSRA		;= 44
+ 1128  54                 226    	LSRB		;= 54
+ 1129  64 10              227    	LSR 	$10,X	;= 64
+ 112B  74 10 00           228    	LSR 	$1000	;= 74
+                          229   	
+ 112E  40                 230    	NEGA		;= 40
+ 112F  50                 231    	NEGB		;= 50
+ 1130  60 10              232    	NEG 	$10,X	;= 60
+ 1132  70 10 00           233    	NEG 	$1000	;= 70
+                          234   
+ 1135  01                 235    	NOP		;= 01
+                          236    	
+ 1136  8A 25              237    	ORAA 	#$25	;= 8A
+ 1138  9A 25              238    	ORAA 	$25	;= 9A
+ 113A  AA 10              239   	ORAA 	$10,X	;= AA 
+ 113C  BA 10 00           240   	ORAA 	$1000	;= BA
+ 113F  CA 25              241    	ORAB 	#$25	;= CA
+ 1141  DA 25              242    	ORAB 	$25	;= DA
+ 1143  EA 10              243    	ORAB 	$10,X	;= EA
+ 1145  FA 10 00           244    	ORAB 	$1000	;= FA
+                          245   
+ 1148  36                 246    	PSHA		;= 36
+ 1149  37                 247    	PSHB		;= 37
+ 114A  32                 248    	PULA		;= 32
+ 114B  33                 249    	PULB		;= 33
+                          250   
+ 114C  49                 251    	ROLA		;= 49
+ 114D  59                 252    	ROLB		;= 59
+ 114E  69 10              253    	ROL 	$10,X	;= 69
+ 1150  79 10 00           254    	ROL 	$1000	;= 79
+                          255   
+ 1153  46                 256    	RORA		;= 46
+ 1154  56                 257    	RORB		;= 56
+ 1155  66 10              258    	ROR 	$10,X	;= 66
+ 1157  76 10 00           259    	ROR 	$1000	;= 76
+                          260   
+                          261   .EJECT
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   5
+Test: MC6800/6802 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+ 115A  3B                 262    	RTI		;= 3B
+                          263   
+ = 0000115B               264   procRts EQU *
+ 115B  39                 265    	RTS		;= 39
+                          266   
+ 115C  10                 267    	SBA		;= 10
+                          268    	
+ 115D  82 25              269   	SBCA 	#$25	;= 82
+ 115F  92 25              270    	SBCA 	$25	;= 92
+ 1161  A2 10              271    	SBCA 	$10,X	;= A2  
+ 1163  B2 10 00           272    	SBCA 	$1000	;= B2
+                          273    	
+ 1166  C2 25              274   	SBCB 	#$25	;= C2
+ 1168  D2 25              275   	SBCB 	$25	;= D2
+ 116A  E2 10              276   	SBCB 	$10,X	;= E2
+ 116C  F2 10 00           277   	SBCB 	$1000	;= F2
+                          278   
+ 116F  0D                 279    	SEC		;= 0D
+ 1170  0F                 280    	SEI		;= 0F
+ 1171  0B                 281    	SEV		;= 0B
+                          282    	
+ 1172  A7 10              283   	STAA 	$10,X	;= 97
+ 1174  97 25              284    	STAA 	$25	;= A7
+ 1176  B7 10 00           285    	STAA 	$1000	;= B7
+                          286    	
+ 1179  E7 10              287    	STAB 	$10,X	;= D7
+ 117B  D7 25              288   	STAB 	$25	;= E7
+ 117D  F7 10 00           289    	STAB 	$1000	;= F7
+                          290    	
+ 1180  AF 10              291    	STS 	$10,X	;= 9F
+ 1182  9F 25              292    	STS 	$25	;= AF
+ 1184  BF 10 00           293   	STS 	$1000	;= BF
+                          294    	
+ 1187  EF 10              295    	STX 	$10,X	;= DF
+ 1189  DF 25              296    	STX 	$25	;= EF
+ 118B  FF 10 00           297    	STX 	$1000	;= FF
+                          298   
+ 118E  80 25              299    	SUBA 	#$25	;= 80
+ 1190  90 25              300    	SUBA 	$25	;= 90
+ 1192  A0 10              301    	SUBA 	$10,X	;= A0   
+ 1194  B0 10 00           302    	SUBA 	$1000	;= B0
+                          303   
+ 1197  C0 25              304    	SUBB 	#$25	;= C0
+ 1199  D0 25              305    	SUBB 	$25	;= D0
+ 119B  E0 10              306    	SUBB 	$10,X	;= E0
+ 119D  F0 10 00           307    	SUBB 	$1000	;= F0
+                          308   	
+ 11A0  3F                 309   	SWI		;= 3F
+ 11A1  16                 310   	TAB		;= 16
+ 11A2  06                 311   	TAP		;= 06
+ 11A3  17                 312   	TBA		;= 17
+ 11A4  07                 313   	TPA		;= 07
+                          314   		
+ 11A5  4D                 315   	TSTA		;= 4D
+ 11A6  5D                 316   	TSTB		;= 5D
+ 11A7  6D 10              317   	TST 	$10,X	;= 6D
+ 11A9  7D 10 00           318   	TST 	$1000	;= 7D
+                          319   
+ 11AC  30                 320   	TSX		;= 30
+ 11AD  35                 321   	TXS		;= 35
+ 11AE  3E                 322   	WAI		;= 3E
+                          323   
+ = 000011AF               324   INSTRUCTIONS_END EQU *  ; last location of used ROM
+                          325   
+                          326   .SUBTTL Code Examples
+                          327   .EJECT
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   6
+Test: MC6800/6802 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          328   ;----------------------------------------------------------------------------
+                          329   ;
+ 11AF  EF EF              330           FCB LOW  ($89ABCDEF), $89ABCDEF & $EF         		; Bits [ 7: 0]
+ 11B1  CD CD              331           FCB HIGH ($89ABCDEF), ($89ABCDEF >>  8) & $FF 		; Bits [15: 8]
+ 11B3  CD CD              332           FCB BYTE2($89ABCDEF), ($89ABCDEF >>  8) & $FF 		; Bits [15: 8]
+ 11B5  AB AB              333           FCB BYTE3($89ABCDEF), ($89ABCDEF >> 16) & $FF 		; Bits [23:16]
+ 11B7  89 89              334           FCB BYTE4($89ABCDEF), ($89ABCDEF >> 24) & $ff 		; Bits [31:24]
+ 11B9  CDEF               335           FDB LWRD ($89ABCDEF), $89ABCDEF & $FFFF       		; Bits [15: 0]	    
+ 11BB  CDEF            
+ 11BD  89AB               336           FDB HWRD ($89ABCDEF), $89ABCDEF >> 16	         	; Bits [31:16]	         
+ 11BF  89AB            
+ 11C1  0034               337   	FDB PAGE ($12345678), ($12345678 & $003F0000) >> 16	; Bits [21:16]             
+ 11C3  0034            
+                          338   
+ 11C5  15 01 0D 30 31     339   _fcb01c	FCB  	_FCB01C_LENGTH, 1,13,'012"3":; ,"', '", "', 'A', '"', ''', '', "";, 22, 25, 4 \
+ 11CA  32 22 33 22 3A  
+ 11CF  3B 20 2C 22 00  
+ 11D4  00 41 22 27 00  
+ 11D9  00              
+ = 00000015               340   _FCB01C_LENGTH EQU * - _fcb01c
+                          341   
+ = 00000011               342   _11 SET $11
+ = 00000012               343   _12 SET $12
+ = 00000013               344   _13 SET $13
+ 11DA                     345   _fcb3:   FCB	_11,_12, _13, 'Z'+1, \
+                                		 %10101, %1, %101,   \
+                                                 "1234567890abcd ",  \
+                                                 'A',_fcb3 AND $FF, \
+                                                 "1234567890abcde",  \
+                                                 $FF,$FF
+ 11DA  11 12 13 5B 15   
+ 11DF  01 05 31 32 33  
+ 11E4  34 35 36 37 38  
+ 11E9  39 30 61 62 63  
+ 11EE  64 20 41 DA 31  
+ 11F3  32 33 34 35 36  
+ 11F8  37 38 39 30 61  
+ 11FD  62 63 64 65 FF  
+ 1202  FF              
+                          346   
+ 1203  32 36 2F 30 31     347   _fcb09	FCB	__DATE__, __TIME__, __CENTURY__
+ 1208  2F 32 30 32 35  
+ 120D  31 34 3A 32 35  
+ 1212  3A 34 36 15     
+                          348   
+ 1216                     349   _fcb10	FCB	'26/01/2025', '14:25:46', '21', \
+                                		$00
+ 1216  32 36 2F 30 31   
+ 121B  2F 32 30 32 35  
+ 1220  31 34 3A 32 35  
+ 1225  3A 34 36 32 31  
+ 122A  00              
+                          350   
+ 122B  0001               351   _FDB1	FDB 1
+ 122D  0000000C           352   _FDW12:	FDW 12
+                          353   .EJECT
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   7
+Test: MC6800/6802 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          354   ;----------------------------------------------------------------------------
+                          355   ;
+ 1231  001C               356   	FDB 	STRLEN("XASMAVR Macro Assembler V2.1") 
+                          357   
+ 1233  01 01              358   	FCB EXP2(0),  1		  
+ 1235  80 80              359   	FCB EXP2(7),  128	  
+ 1237  0100               360   	FDB EXP2(8),  256	  
+ 1239  0100            
+ 123B  8000               361   	FDB EXP2(15), 32768                                                             
+ 123D  8000            
+ 123F  00010000           362   	FDW EXP2(16), 65536                                                            
+ 1243  00010000        
+ 1247  00800000           363   	FDW EXP2(23), 8388608	  
+ 124B  00800000        
+ 124F  01000000           364   	FDW EXP2(24), 16777216 
+ 1253  01000000        
+ 1257  80000000           365   	FDW EXP2(31), 2147483648  
+ 125B  80000000        
+                          366   	
+ 125F  40 40              367           FCB LOG2(0),                    64 ; Illegal, out of range
+ 1261  00 00              368           FCB LOG2(1),                     0
+ 1263  07 07              369           FCB LOG2(128),                   7
+ 1265  0F 0F              370           FCB LOG2(32768),     		15
+ 1267  10 10              371           FCB LOG2(65536),     		16
+ 1269  17 17              372           FCB LOG2(8388608),     		23
+ 126B  18 18              373           FCB LOG2(16777216),     	24
+ 126D  1F 1F              374           FCB LOG2(2147483648),     	31
+ 126F  20 20              375           FCB LOG2(4294967296),     	32
+ 1271  27 27              376           FCB LOG2(549755813888),     	39
+ 1273  2F 2F              377           FCB LOG2(140737488355328),      47
+ 1275  37 37              378           FCB LOG2(36028797018963968),    55
+ 1277  3F 3F              379           FCB LOG2(9223372036854775808),  63
+ 1279  40 40              380           FCB LOG2(18446744073709551616),	64
+                          381   	
+                          382   	
+ = 00000001               383   #define _flag1
+ = 00000001               384   .DEFINE _flag2
+ 127B  01 00              385   	FCB DEFINED(_flag1), !DEFINED(_flag1)
+ 127D  01 00              386   	FCB DEFINED(_flag2), !DEFINED(_flag2)
+                          387   
+                          388   #if DEFINED(_flag1)
+ 127F  01                 389   	nop	      	; flag1
+                          390   #elif DEFINED(_flag2)
+                          391   #endif
+                          392   
+                          393   #if !DEFINED(_flag1)	
+                          394   #elif DEFINED(_flag2)
+ 1280  01                 395   	nop		; flag2	
+                          396   #endif
+                          397   	
+                          398   ;-----------------------------------------------------------------,
+                          399   ; Warning: Use parenthesis in complex expressions!		  |
+ = 0000A675               400   _VAR SET $a600*256+$75a2>>8	     ;; =00A60075 NOT EXPECTED ?! |
+ 1281  A675               401   	FDB _VAR		     ;                            |
+ = 00A60075               402   _VAR SET ($a600*256)+($75a2>>8)      ;; =00a60075 expected        |
+ 1283  0075               403   	FDB LWRD(_VAR)               ;	                          |
+ 1285  00A6               404   	FDB HWRD(_VAR)               ;	                          |
+ = 0000A675               405   _VAR SET ($a600*256+$75a2)>>8        ;; =0000a675 expected        |
+ 1287  A675               406   	FDB _VAR                     ;	                          |
+                          407   ;-----------------------------------------------------------------'
+                          408   .EJECT
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   8
+Test: MC6800/6802 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          409   ;----------------------------------------------------------------------------
+                          410   ;
+                          411   ;	Decimal subtract subroutine for 16 decimal digit
+                          412   ;
+ = 00000000               413   SUBTRH	EQU	 0
+ = 00000008               414   MINUEND	EQU 	 8
+ = 00000010               415   RSLT	EQU	16
+                          416   
+ 1300                     417   	ORG 	$1300
+                          418   
+ = 00001300               419   procDsub EQU *
+ 1300  CE 00 08           420    	ldx	#8
+ 1303  86 99              421   dsub1:	ldaa	#$99
+ 1305  A0 00              422   	suba 	SUBTRH, X
+                          423   .EVEN
+ 1308  A7 10              424   	staa 	RSLT, X
+ 130A  09                 425   	dex
+ 130B  26 F6              426   	bne 	dsub1
+ 130D  CE 00 08           427   	ldx	#8
+ 1310  0D                 428   	sec
+ 1311  A6 08              429   dsub2: 	ldaa 	MINUEND, X
+ 1313  A9 10              430   	adca 	RSLT, X
+ 1315  19                 431   	daa
+ 1316  A7 10              432   	staa 	RSLT, X
+ 1318  09                 433   	dex
+ 1319  26 F6              434   	bne	dsub2
+ 131B  39                 435   	rts
+                          436   
+                          437   ;------------------------------------------------------------------------------
+                          438   ;
+                          439   ;	Macros
+                          440   ;
+                          441   .MACRO Addition 
+                          442   	ldaa 	@0	; param0		
+                          443   	adda 	@1	; param1
+                          444   .ENDM
+                          445   
+ 131C                  +  446   	ADDITION $10, 20
+ 131C  96 10           +  447   	ldaa 	$10 
+ 131E  9B 14           +  448   	adda 	20 
+ 1320  B7 01 00           449   	STAA 	$100 
+ 1323                  +  450   	ADDITION $12, 15
+ 1323  96 12           +  451   	ldaa 	$12 
+ 1325  9B 0F           +  452   	adda 	15 
+ 1327  B7 01 01           453   	STAA 	$101
+                          454   .EVEN
+ 132A  3F                 455   	SWI
+                          456   
+                          457   ;------------------------------------------------------------------------------
+                          458   
+ 13FE                     459   	ORG 	RESET
+ 13FE  101B               460   	FDB	MC6800_instructions
+                          461   
+ = 00001400               462   ROMEND	EQU  	*   	; $13FF last location of ROM
+                          463   
+                          464   .IF ROMEND > (ROMSTART+ROM_SIZE)
+                          466   .ENDIF
+                          467   ;------------------------------------------------------------------------------
+                          468   .EJECT
+6800/6802 Macro-Assembler, Version 2.1                    26/01/2025  PAGE   9
+Test: MC6800/6802 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          469   	END
+
+USER SYMBOLS
+
+_11 . . . . . . . .  0011 A  _12 . . . . . . . .  0012 A  _13 . . . . . . . .  0013 A  _2345678901234567890 101B C  
+_fcb01c . . . . . .  11C5 C  _FCB01C_LENGTH. . .  0015 A  _fcb09. . . . . . .  1203 C  _fcb10. . . . . . .  1216 C  
+_fcb3 . . . . . . .  11DA C  _FDB1 . . . . . . .  122B C  _FDW12. . . . . . .  122D C  _flag1. . . . . . .  0001 A  
+_flag2. . . . . . .  0001 A  _l1 . . . . . . . .  109E C  _VAR. . . . . . . .  A675 A  dsub1 . . . . . . .  1303 C  
+dsub2 . . . . . . .  1311 C  info. . . . . . . .  1000 C  INFO_LEN. . . . . .  001B A  INSTRUCTIONS_END. .  11AF A  
+MC6800_instructions  101B C  MINUEND . . . . . .  0008 A  procDsub. . . . . .  1300 A  procRts . . . . . .  115B A  
+RAM_SIZE. . . . . .  0080 A  RAMEND. . . . . . .  0080 A  RAMSTART. . . . . .  0000 A  RESET . . . . . . .  13FE A  
+ROM_SIZE. . . . . .  0400 A  ROMEND. . . . . . .  1400 A  ROMSTART. . . . . .  1000 A  RSLT. . . . . . . .  0010 A  
+STACK . . . . . . .  0060 A  STACK_SIZE. . . . .  0020 A  SUBTRH. . . . . . .  0000 A  XASM6802. . . . . .  0001 A  
+
+ASSEMBLY COMPLETE,   NO ERRORS
