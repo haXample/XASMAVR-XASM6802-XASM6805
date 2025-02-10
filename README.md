@@ -57,7 +57,7 @@ The [build process](document/build/VS2010build32.jpg) generates four different 3
 Note: When compiled with *MS Visual Studio 2019*, the executables will no longer run under Windows XP.  
       To build and run the haXASM project under another OS, some adaptations may be required.
 
-The [build process](document/build/VS2010build64.jpg) automatically generates 64bit-Versions of haXASM when invoked under:
+The [build process](document/build/VS2019build64.jpg) automatically generates 64bit-Versions of haXASM when invoked under:
 
 ```bld64bit
 **********************************************************************    
