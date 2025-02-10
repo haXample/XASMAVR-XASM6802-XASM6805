@@ -6,19 +6,20 @@ You will end up with a listing at `myproj.LST` of the source file,
 and with `myproj.s19` in Motorola S-Record format. Optionally `myproj.bin` can be generated.    
 
 #### List File Formatting Directives
-.TITLE text.............................    Title in page header  
-.SUBTTL text.........................       Subtitle in page header  
-.PAGELENGTH(number).......  		    Lines per page   
-.PAGEWIDTH(number) .........   		    Colums per page  
-.EJECT...................................   New listing page ejected ('FormFeed')  
-.SYMBOLS............................        Symbol map appended in listing  
-.NOSYMBOLS ......................           Listing without symbol map (default)  
-.NOLISTMACRO...................             Disable listing of macro expansion (default)  
-.NOLISTMAC.........................         Disable listing of macro expansion (default)  
-.LISTMACRO.........................         Enable listing of macro expansion  
-.LISTMAC..............................      Enable listing of macro expansion  
-.NOLIST.................................    Suppress source lines in listing  
-.LIST ..................................... Show source lines in listing (default)  
+.MODEL NOINFO..................     		Suppress some info displayed on console  
+.TITLE text................................    	Title in page header  
+.SUBTTL text............................       	Subtitle in page header  
+.PAGELENGTH(number)......  			Lines per page   
+.PAGEWIDTH(number) .......   			Colums per page  
+.EJECT........................................      	New listing page ejected ('FormFeed')  
+.SYMBOLS................................           	Symbol map appended in listing  
+.NOSYMBOLS ........................          	Listing without symbol map (default)  
+.NOLISTMACRO ...................         	Disable listing of macro expansion (default)  
+.NOLISTMAC...........................         	Disable listing of macro expansion (default)  
+.LISTMACRO............................          	Enable listing of macro expansion  
+.LISTMAC..................................         	Enable listing of macro expansion  
+.NOLIST.....................................	Suppress source lines in listing  
+.LIST ...........................................	Show source lines in listing (default)  
 
 #### Commandline options:
 
