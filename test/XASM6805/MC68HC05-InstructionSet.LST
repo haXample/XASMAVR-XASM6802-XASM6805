@@ -1,0 +1,932 @@
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   1
+Test: MC68HC05 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+ = 00000001                 1   #define	XASM6805
+                            2   ;------------------------------------------,
+                            3   #ifdef XASM6805			           ;
+                            4    .TITLE Test: MC68HC05 Instruction set
+                            5    .PAGELENGTH(84)		           ;
+                            6    .PAGEWIDTH(130)		           ;
+                            7    .SYMBOLS			           ;
+                            8   #endif ;XASM6805	   	           ;
+                            9   ;------------------------------------------'
+                           10   .LISTMAC
+                           11   
+                           12   ;------------------------------------------------------------------------------
+                           13   ;
+                           14   ; Example:	MC6805U3 Hardware Equates 
+                           15   ;
+                           16   ; RAM Layout and working storage definitions (Direct Page $0..$FF)
+                           17   ;
+                           18   ; $0000F Memory mapped I/O area
+ = 00000000                19   IOAREA		EQU	$0000		;Memory mapped I/O - 16 bytes
+ = 00000010                20   IOAREA_SIZE	EQU	16
+                           21   
+                           22   ; $0020..$003F = Reserved user scratchpad RAM (48 bytes)
+ = 00000020                23   RAMUSER		EQU	$0020		;Reserved user RAM 48 bytes
+ = 00000030                24   RAMUSER_SIZE	EQU	48
+                           25   
+                           26   ; $0040..$007F = RAM (64 bytes)
+ = 00000040                27   RAMSTART	EQU	$0040		;RAM (including stack) 64 bytes
+ = 00000040                28   RAM_SIZE	EQU	64
+                           29   
+                           30   ; $0078..$007F Stack area begin (within RAM)
+ = 00000078                31   STACK		EQU	RAMSTART+(RAM_SIZE-STACK_SIZE) ;Stack 8 bytes
+ = 00000008                32   STACK_SIZE	EQU	8
+                           33   
+                           34   ; $0080 User ROM (User ROM Page-Zero)
+ = 00000080                35   ROMPAGE0	EQU	$0080		;User ROM (Page Zero) - 128 bytes
+ = 00000080                36   ROMPAGE0_SIZE	EQU	128		;Access with short instructions	(8bit addressing)
+                           37   
+                           38   ; $0080 Main User ROM
+ = 00000100                39   ROMSTART	EQU	$0100		;User ROM (Page Zero) - 128 bytes
+ = 00000F00                40   ROM_SIZE	EQU	4096-ROMSTART	;Access with short instructions	(8bit addressing)
+                           41   
+                           42   ; $0EFA Manufacturing Tests
+ = 00000EFA                43   TEST_VECTORS	EQU	$0EFA		;Addresses to RAM/ROM test procedures
+ = 00000F00                44   MANUF_MODE	EQU	$0F00		;Manufacturing burn-in modes
+                           45   
+                           46   ; $0F38 Sel Check ROM
+ = 00000F38                47   ROMCHECKSTART	EQU 	$0F38		;ROM checksum byte placed here
+ = 000000C0                48   ROMCHECK_SIZE	EQU 	192
+                           49   
+                           50   ; $0FF8 Timer Interrupt Vector
+                           51   ; $0FFA	External Interrupt Vector
+                           52   ; $0FFC	SWI
+                           53   ; $0FFE	RESET
+ = 00000FF8                54   VECTORS		EQU	$0FF8		;Interrupt Vector Area (end-of-ROM)
+ = 00000008                55   VECTORS_SIZE	EQU	4*2		;4 * 16bit addresses
+                           56   
+                           57   ;--------------------------------------------------------------------------
+                           58   ;  7       6        5         4         3         2        1        0
+                           59   ;  ...     ...     _NUM_LED_ _SCR_LED_ _CAP_LED_ _KYBDAT_ _SYSCLK_ _KYBCLK_
+                           60   ;--------------------------------------------------------------------------
+ = 00000000                61   _KYBCLK_	EQU	0  		;Keyboard clock  (output)
+ = 00000001                62   _SYSCLK_	EQU	1  		;system clock    (input)
+ = 00000002                63   _KYBDAT_	EQU	2		;Keyboard data   (output)
+ = 00000003                64   _CAP_LED_ 	EQU	3		;Caps-lock LED	 (output)
+ = 00000004                65   _SCR_LED_ 	EQU	4		;Scroll-lock LED (output)
+ = 00000005                66   _NUM_LED_ 	EQU	5		;Num-lock LED	 (output)
+                           67   ;NC		EQU	6		;NC - not connected
+                           68   ;NC		EQU	7		;NC - not connected
+                           69   
+ = 00000001                70   KYBCLK		EQU	1 SHL _KYBCLK_	;_KYBCLK_ byte value
+ = 00000002                71   SYSCLK		EQU	1 SHL _SYSCLK_	;_SYSCLK_ byte value
+ = 00000004                72   KYBDAT		EQU	1 SHL _KYBDAT_	;_SYSCLK_ byte value
+ = 00000008                73   CAP_LED		EQU	1 SHL _CAP_LED_	;_CAP_LED_ byte value
+ = 00000010                74   SCR_LED		EQU	1 SHL _SCR_LED_	;_SCR_LED_ byte value
+ = 00000020                75   NUM_LED		EQU	1 SHL _NUM_LED_	;_NUM_LED_ byte value
+                           76   
+                           77   ;------------------------------------------------------------------------------
+                           78   ;
+                           79   ;	I/O Ports and Registers ($0000 .. $000F)
+                           80   ;
+ 0000                      81   		ORG IOAREA
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   2
+Test: MC68HC05 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                           82   
+                           83   ;ensure a byte value
+ = 000000C2                84   PORTA_MASK EQU NOT (SCR_LED OR CAP_LED OR NUM_LED OR KYBCLK OR KYBDAT) AND $FF 
+                           85   
+                           86   ; $0000..0003 Ports A..D
+ 0000                      87   PORTA		RMB	1	;PortA i/o data register			
+ 0001                      88   PORTB		RMB	1	;PortB i/o data register
+ 0002                      89   PORTC		RMB	1	;PortC i/o data register
+ 0003                      90   PORTD		RMB	1	;PortD input only
+                           91   
+                           92   ; $0004..0006 Port Data Direction A..C (write only)
+ 0004                      93   DDRA		RMB	1	;PortA data direction (bit0..bit7)
+ 0005                      94   DDRB		RMB	1	;PortB data direction (bit0..bit7)
+ 0006                      95   DDRC		RMB	1	;PortC 0ata direction (bit0..bit7)
+                           96   
+                           97   ;-------------------------------------------------------------------							   
+                           98   ;
+                           99   ;               User Data RAM Area (Example)
+                          100   ;
+ 0007                     101   set3Modtbl	RMB	32	;$22..$41
+ = 00000020               102   SET3MODTBL_L EQU * - set3Modtbl
+                          103   
+ 0027                     104   		RMB	4	;$42
+                          105   
+ 002B                     106   mtxFld		RMB 	16	;$46 
+ = 00000010               107   MTXFLD_L EQU * - mtxFld		;=16 bytes
+                          108   
+ 003B                     109   tmpcnt		RMB	1	;$56 temporary multi purpose location
+ 003C                     110   cmdparm		RMB	1	;$57 keyboard command parameter
+ 003D                     111   respbyt		RMB	1	;$58
+                          112   
+ 003E                     113   mtxC		RMB	1	;$59 port C DDR
+ 003F                     114   mtxB		RMB	1	;$5a port B DDR
+                          115   
+ 0040                     116   specialkey	RMB	1	;$5b
+ 0041                     117   typmatic	RMB	1	;$5c
+ 0042                     118   altprint	RMB	1	;$5d
+ 0043                     119   delay_count	RMB	1	;$5e
+                          120   
+ 0044                     121   tmpaux1		RMB	1	;$5f temporary auxiliary #1
+                          122   
+ 0045                     123   lastchr		RMB	1	;$60
+ 0046                     124   mtrxSenseIndex	RMB	1	;$61
+ 0047                     125   mtrxSenseNew	RMB	1	;$62
+ 0048                     126   mtrxSenseOld	RMB	1	;$63
+                          127   
+ 0049                     128   tmpaux2		RMB	1	;$64 temporary auxiliary #2
+ 004A                     129   tmp_65		RMB	1	;$65 
+ 004B                     130   tmpaux3		RMB	1	;$66 temporary auxiliary #3
+                          131   				
+ 004C                     132   outbuf	 	RMB	16+1	;$67..$77
+ = 00000011               133   OUTBUF_L EQU * - outbuf				
+                          134   
+                          135   ;		. . . . . . . . . . . . . . . . . . . . . . . . . .
+ 0078                     136   		ORG STACK		; $78 Start of program STACK
+ 0078                     137   		RMB    STACK_SIZE	; 8 bytes user stack area
+                          138   ;		. . . . . . . . . . . . . . . . . . . . . . . . . . 
+ = 00000080               139   RAMEND 		EQU 	*		; top_of_stack = end-of-RAM
+                          140   
+                          141   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   3
+Test: MC68HC05 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          142   ;------------------------------------------------------------------------------
+                          143   ;
+                          144   ;		 MC6805U3 4K User ROM  ($0100 .. 0FFF)
+                          145   ;
+                          146   ;			Info String
+                          147   ;
+ 0080                     148   	ORG	ROMPAGE0	
+ 0080  4D 43 36 38 48     149   info	FCB	"MC68HC05 Instruction Set"
+ 0085  43 30 35 20 49  
+ 008A  6E 73 74 72 75  
+ 008F  63 74 69 6F 6E  
+ 0094  20 53 65 74     
+ = 00000018               150   INFO_LEN EQU * - info
+                          151   
+ 0098                     152   _234567890123456789012345678901234567890: ; 40 chars max:	     
+                          153   		 
+                          154   ;------------------------------------------------------------------------------
+                          155   ;
+                          156   ;		 MC68HC05 Instruction Set
+                          157   ;
+ 0100                     158          	ORG ROMSTART
+ 0100                     159   MC68HC05_instructions:
+                          160   
+                          161   	; Add with Carry 
+ 0100  A9 12              162   	ADC #$12 		;IMM A9 ii    2~
+ 0102  B9 12              163   	ADC $12 		;DIR B9 dd    3~
+ 0104  C9 12 34           164   	ADC $1234 		;EXT C9 hh ll 4~
+ 0107  F9                 165   	ADC ,X    		;IX  F9       3~
+ 0108  E9 12              166   	ADC $12,X 		;IX1 E9 ff    4~
+ 010A  D9 12 34           167   	ADC $1234,X 		;IX2 D9	      5~
+                          168   	
+                          169   	; Add without Carry
+ 010D  AB 12              170   	ADD #$12 		;IMM AB ii    2~
+ 010F  BB 44              171   	ADD tmpaux1 		;DIR BB dd    3~
+ 0111  CB 12 34           172   	ADD $1234 		;EXT CB hh ll 4~
+ 0114  FB                 173   	ADD ,X    		;IX  FB       3~
+ 0115  EB 12              174   	ADD $12,X 		;IX1 EB ff    4~
+ 0117  DB 12 34           175   	ADD $1234,X 		;IX2 DB	      5~
+                          176   	
+                          177   	; Logical AND
+ 011A  A4 12              178   	AND #$12 		;IMM A4 ii    2~
+ 011C  B4 12              179   	AND $12 		;DIR B4 dd    3~
+ 011E  C4 12 34           180   	AND $1234 		;EXT C4 hh ll 4~
+ 0121  F4                 181   	AND ,X    		;IX  F4       3~
+ 0122  E4 12              182   	AND $12,X 		;IX1 E4 ff    4~
+ 0124  D4 12 34           183   	AND $1234,X 		;IX2 D4 ee ff 5~
+                          184   	
+                          185   	; Arithmetic Shift Left
+ 0127  48                 186   	ASLA 			;INH (A) 48    3~
+ 0128  58                 187   	ASLX 			;INH (X) 58    3~
+ 0129  38 12              188   	ASL $12 		;DIR     38 dd 5~
+ 012B  78                 189   	ASL ,X    		;IX      78    5~
+ 012C  68 12              190   	ASL $12,X 		;IX1     68 ff 6~
+                          191   	
+                          192   	; Arithmetic Shift Right
+ 012E  47                 193   	ASRA 			;INH (A) 47    3~
+ 012F  57                 194   	ASRX 			;INH (X) 57    3~
+ 0130  37 12              195   	ASR $12 		;DIR     37 dd 5~
+ 0132  77                 196   	ASR ,X    		;IX      77    5~
+ 0133  67 12              197   	ASR $12,X 		;IX1     67 ff 6~
+                          198   	
+                          199   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   4
+Test: MC68HC05 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+ 0135                     200   	_l1:
+                          201   	; Branch if Carry Clear
+ 0135  24 FE              202   	BCC _l1 		;REL 24 rr 3~
+                          203   	
+                          204   	; Clear Bit in Memory
+ 0137  11 12              205   	BCLR 0,$12		;DIR (bit 0) 11 dd 5~
+ 0139  13 12              206   	BCLR 1,$12 		;DIR (bit 1) 13 dd 5~
+ 013B  15 12              207   	BCLR 2,$12		;DIR (bit 2) 15 dd 5~
+ 013D  17 12              208   	BCLR 3,$12 		;DIR (bit 3) 17 dd 5~
+ 013F  19 12              209   	BCLR 4,$12		;DIR (bit 4) 19 dd 5~
+ 0141  1B 12              210   	BCLR 5,$12 		;DIR (bit 5) 1B dd 5~
+ 0143  1D 12              211   	BCLR 6,$12		;DIR (bit 6) 1D dd 5~
+ 0145  1F 12              212   	BCLR 7,$12 		;DIR (bit 7) 1F dd 5~
+                          213   	
+                          214   	; Branch if Carry Set
+ 0147  25 EC              215   	BCS _l1 		;REL 25 rr 3~
+                          216   	; Branch if Equal
+ 0149  27 EA              217   	BEQ _l1 		;REL 27 rr 3~
+                          218   	; Branch if Half Carry Clear
+ 014B  28 FE              219   	BHCC *	 		;REL 28 rr 3~
+                          220   	; Branch if Half Carry Set
+ 014D  29 00              221   	BHCS * + 2 		;REL 29 rr 3~
+                          222   	; Branch if Higher
+ 014F  22 00              223   	BHI * + 2 		;REL 22 rr 3~
+                          224   	; Branch if Higher or Same  / Branch if Carry Clear
+ 0151  24 00              225   	BHS * + 2 		;REL 24 rr 3~
+ 0153  24 00              226   	BCC * + 2 		;REL 24 rr 3~
+                          227   	; Branch if Interrupt Pin is High
+ 0155  2F 00              228   	BIH * + 2 		;REL 2F rr 3~
+                          229   	; Branch if Interrupt Pin is Low
+ 0157  2E 00              230   	BIL * + 2 		;REL 2E rr 3~
+                          231   	
+                          232   	; Bit Test Memory with Accumulator
+ 0159  A5 12              233   	BIT #$12 		;IMM A5 ii    2~
+ 015B  B5 12              234   	BIT $12 		;DIR B5 dd    3~
+ 015D  C5 12 34           235   	BIT $1234 		;EXT C5 hh ll 4~
+ 0160  F5                 236   	BIT ,X    		;IX  F5       3~
+ 0161  E5 12              237   	BIT $12,X 		;IX1 E5 ff    4~
+ 0163  D5 12 34           238   	BIT $1234,X 		;IX2 D5 ee ff 5~
+                          239   	
+                          240   	; Branch if Lower / Branch if Carry Set
+ 0166  25 00              241   	BLO * + 2 		;REL 25 rr 3~
+ 0168  25 00              242   	BCS * + 2 		;REL 25 rr 3~
+                          243   	; Branch if Lower or Same
+ 016A  23 00              244   	BLS * + 2  		;REL 23 rr 3~
+                          245   	; Branch if Interrupt Mask is Clear
+ 016C  2C 00              246   	BMC * + 2 		;REL 2C rr 3~
+                          247   	; Branch if Minus
+ 016E  2B 00              248   	BMI * + 2  		;REL 2B rr 3~
+                          249   	; Branch if Interrupt Mask is Set
+ 0170  2D 00              250   	BMS * + 2 		;REL 2D rr 3~
+                          251   	; Branch if Not Equal
+ 0172  26 00              252   	BNE * + 2  		;REL 26 rr 3~
+                          253   	; Branch if Plus
+ 0174  2A 00              254   	BPL * + 2 		;REL 2A rr 3~
+                          255   	; Branch Always
+ 0176  20 00              256   	BRA * + 2  		;REL 20 rr 3~
+                          257   	
+                          258   	; Branch if Bit n is Clear
+ 0178  01 12 FF           259   	BRCLR 0,$12,* + 2 	;DIR (bit 0) 01 dd rr 5~
+ 017B  03 12 FF           260   	BRCLR 1,$12,* + 2  	;DIR (bit 1) 03 dd rr 5~
+ 017E  05 12 FF           261   	BRCLR 2,$12,* + 2 	;DIR (bit 2) 05 dd rr 5~
+ 0181  07 12 FF           262   	BRCLR 3,$12,* + 2  	;DIR (bit 3) 07 dd rr 5~
+ 0184  09 12 FF           263   	BRCLR 4,$12,* + 2 	;DIR (bit 4) 09 dd rr 5~
+ 0187  0B 12 FF           264   	BRCLR 5,$12,* + 2  	;DIR (bit 5) OB dd rr 5~
+ 018A  0D 12 FF           265   	BRCLR 6,$12,* + 2 	;DIR (bit 6) OD dd rr 5~
+ 018D  0F 12 FF           266   	BRCLR 7,$12,* + 2  	;DIR (bit 7) OF dd rr 5~
+                          267   	
+                          268   	; Branch Never
+ 0190  21 00              269   	BRN * + 2 		;REL 21 rr 3~
+                          270   	
+                          271   	; Branch if Bit n is Set
+ 0192  00 12 FF           272   	BRSET 0,$12,* + 2 	;DIR (bit 0) 00 dd rr 5~
+ 0195  02 12 FF           273   	BRSET 1,$12,* + 2  	;DIR (bit 1) 02 dd rr 5~
+ 0198  04 12 FF           274   	BRSET 2,$12,* + 2 	;DIR (bit 2) 04 dd rr 5~
+ 019B  06 12 FF           275   	BRSET 3,$12,* + 2  	;DIR (bit 3) 06 dd rr 5~
+ 019E  08 12 FF           276   	BRSET 4,$12,* + 2 	;DIR (bit 4) 08 dd rr 5~
+ 01A1  0A 12 FF           277   	BRSET 5,$12,* + 2  	;DIR (bit 5) 0A dd rr 5~
+ 01A4  0C 12 FF           278   	BRSET 6,$12,* + 2 	;DIR (bit 6) 0C dd rr 5~
+ 01A7  0E 12 FF           279   	BRSET 7,$12,* + 2  	;DIR (bit 7) 0E dd rr 5~
+                          280   	
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   5
+Test: MC68HC05 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          281   	; Set Bit in Memory
+ 01AA  10 12              282   	BSET 0,$12 	 	;DIR (bit 0) 10 dd 5~
+ 01AC  12 12              283   	BSET 1,$12  	  	;DIR (bit 1) 12 dd 5~
+ 01AE  14 12              284   	BSET 2,$12 	 	;DIR (bit 2) 14 dd 5~
+ 01B0  16 12              285   	BSET 3,$12  	  	;DIR (bit 3) 16 dd 5~
+ 01B2  18 12              286   	BSET 4,$12 	 	;DIR (bit 4) 18 dd 5~
+ 01B4  1A 12              287   	BSET 5,$12  	  	;DIR (bit 5) 1A dd 5~
+ 01B6  1C 12              288   	BSET 6,$12 	 	;DIR (bit 6) 1C dd 5~
+ 01B8  1E 12              289   	BSET 7,$12  	  	;DIR (bit 7) 1E dd 5~
+                          290   	
+                          291   	; Branch to Subroutine
+ 01BA  AD 00              292   	BSR * + 2 		;REL AD rr 6~
+                          293   	
+                          294   	; Clear Carry Bit
+ 01BC  98                 295   	CLC 			;INH 98 2~
+                          296   	; Clear Interrupt Mask Bit
+ 01BD  9A                 297   	CLI  			;INH 9A 2~
+                          298   	
+                          299   	; Clear
+ 01BE  4F                 300   	CLRA 			;INH (A) 4F    3~
+ 01BF  5F                 301   	CLRX  			;INH (X) 5F    3~
+ 01C0  3F 12              302   	CLR $12 		;DIR     3F dd 5~
+ 01C2  7F                 303   	CLR ,X    		;IX      7F    5~
+ 01C3  6F 12              304   	CLR $12,X 		;IX1     6F ff 6~
+                          305   	
+                          306   	; Compare Accumulator with Memory
+ 01C5  A1 12              307   	CMP #$12 		;IMM A1 ii    2~
+ 01C7  B1 12              308   	CMP $12			;DIR B1 dd    3~
+ 01C9  C1 12 34           309   	CMP $1234 		;EXT C1 hh ll 4~
+ 01CC  F1                 310   	CMP ,X    		;IX  F1       3~
+ 01CD  E1 12              311   	CMP $12,X 		;IX1 E1 ff    4~
+ 01CF  D1 12 34           312   	CMP $1234,X  		;IX2 D1 ee ff 5~
+                          313   	
+                          314   	; Complement
+ 01D2  43                 315   	COMA 			;INH (A) 43    3~
+ 01D3  53                 316   	COMX  	 		;INH (X) 53    3~
+ 01D4  33 12              317   	COM $12 		;DIR     33 dd 5~
+ 01D6  73                 318   	COM ,X    		;IX      73    5~
+ 01D7  63 12              319   	COM $12,X 		;IX1     63 ff 6~
+                          320   	
+                          321   	; Compare Index Register with Memory
+ 01D9  A3 12              322   	CPX #$12 		;IMM A3 ii    2~
+ 01DB  B3 12              323   	CPX $12			;DIR B3 dd    3~
+ 01DD  C3 12 34           324   	CPX $1234 		;EXT C3 hh ll 4~
+ 01E0  F3                 325   	CPX ,X    		;IX  F3       3~
+ 01E1  E3 12              326   	CPX $12,X 		;IX1 E3 ff    4~
+ 01E3  D3 12 34           327   	CPX $1234,X  		;IX2 D3 ee ff 5~
+                          328   	
+                          329   	; Decrement
+ 01E6  4A                 330   	DECA 			;INH (A) 4A    3~
+ 01E7  5A                 331   	DECX  	 		;INH (X) 5A    3~
+ 01E8  3A 12              332   	DEC $12 		;DIR     3A dd 5~
+ 01EA  7A                 333   	DEC ,X    		;IX      7A    5~
+ 01EB  6A 12              334   	DEC $12,X 		;IX1     6A ff 6~
+                          335   	
+                          336   	; Exclusive-OR Memory with Accumulator
+ 01ED  A8 12              337   	EOR #$12 		;IMM A8 ii    2~
+ 01EF  B8 12              338   	EOR $12			;DIR B8 dd    3~
+ 01F1  C8 12 34           339   	EOR $1234 		;EXT C8 hh ll 4~
+ 01F4  F8                 340   	EOR ,X    		;IX  F8       3~
+ 01F5  E8 12              341   	EOR $12,X 		;IX1 E8 ff    4~
+ 01F7  D8 12 34           342   	EOR $1234,X  		;IX2 D8 ee ff 5~
+                          343   	
+                          344   	; Increment
+ 01FA  4C                 345   	INCA 			;INH (A) 4C    3~
+ 01FB  5C                 346   	INCX  	 		;INH (X) 5C    3~
+ 01FC  3C 12              347   	INC $12 		;DIR     3C dd 5~
+ 01FE  7C                 348   	INC ,X    		;IX      7C    5~
+ 01FF  6C 12              349   	INC $12,X 		;IX1     6C ff 6~
+                          350   	
+                          351   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   6
+Test: MC68HC05 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          352   	; Jump
+ 0201  BC 80              353   	JMP info		;DIR BC dd    2~
+ 0203  CC 02 65           354   	JMP procRts 		;EXT CC hh ll 3~
+ 0206  FC                 355   	JMP ,X    		;IX  FC       2~
+ 0207  EC 12              356   	JMP $12,X 		;IX1 EC ff    3~
+ 0209  DC 12 34           357   	JMP $1234,X  		;IX2 DC ee ff 4~
+                          358   	
+                          359   	; Jump to Subroutine
+ 020C  BD 80              360   	JSR info		;DIR BD dd    5~
+ 020E  CD 02 65           361   	JSR procRts 		;EXT CD hh ll 6~
+ 0211  FD                 362   	JSR ,X    		;IX  FD       5~
+ 0212  ED 12              363   	JSR $12,X 		;IX1 ED ff    6~
+ 0214  DD 12 34           364   	JSR $1234,X  		;IX2 DD ee ff 7~
+                          365   	
+                          366   	; Load Accumulator from Memory
+ 0217  A6 12              367   	LDA #$12 		;IMM A6 ii    2~
+ 0219  B6 44              368   	LDA tmpaux1		;DIR B6 dd    3~
+ 021B  C6 12 34           369   	LDA $1234 		;EXT C6 hh ll 4~
+ 021E  F6                 370   	LDA ,X    		;IX  F6       3~
+ 021F  E6 12              371   	LDA $12,X 		;IX1 E6 ff    4~
+ 0221  D6 12 34           372   	LDA $1234,X  		;IX2 D6 ee ff 5~
+                          373   	
+                          374   	; Load Index Register from Memory
+ 0224  AE 12              375   	LDX #$12 		;IMM AE ii    2~
+ 0226  BE 44              376   	LDX tmpaux1		;DIR BE dd    3~
+ 0228  CE 12 34           377   	LDX $1234 		;EXT CE hh ll 4~
+ 022B  FE                 378   	LDX ,X    		;IX  FE       3~
+ 022C  EE 12              379   	LDX $12,X 		;IX1 EE ff    4~
+ 022E  DE 12 34           380   	LDX $1234,X  		;IX2 DE ee ff 5~
+                          381   	
+                          382   	; Logical Shift Left
+ 0231  48                 383   	LSLA 			;INH (A) 48    3~
+ 0232  58                 384   	LSLX  	 		;INH (X) 58    3~
+ 0233  38 12              385   	LSL $12 		;DIR     38 dd 5~
+ 0235  78                 386   	LSL ,X    		;IX      78    5~
+ 0236  68 12              387   	LSL $12,X 		;IX1     68 ff 6~
+                          388   	
+                          389   	; Logical Shift Right
+ 0238  44                 390   	LSRA 			;INH (A) 44    3~
+ 0239  54                 391   	LSRX  	 		;INH (X) 54    3~
+ 023A  34 12              392   	LSR $12 		;DIR     34 dd 5~
+ 023C  74                 393   	LSR ,X    		;IX      74    5~
+ 023D  64 12              394   	LSR $12,X 		;IX1     64 ff 6~
+                          395   	
+                          396   	; Multiply Unsigned
+ 023F  42                 397   	MUL 			;INH 42 11~
+                          398   	
+                          399   	; Negate
+ 0240  40                 400   	NEGA 			;INH (A) 40    3~
+ 0241  50                 401   	NEGX  	 		;INH (X) 50    3~
+ 0242  30 12              402   	NEG $12 		;DIR     30 dd 5~
+ 0244  70                 403   	NEG ,X    		;IX      70    5~
+ 0245  60 12              404   	NEG $12,X 		;IX1     60 ff 6~
+                          405   	
+                          406   	; No Operation
+ 0247  9D                 407   	NOP 			;INH 9D 2~
+                          408   	
+                          409   	; Inclusive-OR
+ 0248  AA 12              410   	ORA #$12 		;IMM AA ii    2~
+ 024A  BA 12              411   	ORA $12			;DIR BA dd    3~
+ 024C  CA 12 34           412   	ORA $1234 		;EXT CA hh ll 4~
+ 024F  FA                 413   	ORA ,X    		;IX  FA       3~
+ 0250  EA 12              414   	ORA $12,X 		;IX1 EA ff    4~
+ 0252  DA 12 34           415   	ORA $1234,X  		;IX2 DA ee ff 5~
+                          416   	
+                          417   	; Rotate Left thru Carry
+ 0255  49                 418   	ROLA 			;INH (A) 49    3~
+ 0256  59                 419   	ROLX  	 		;INH (X) 59    3~
+ 0257  39 12              420   	ROL $12 		;DIR     39 dd 5~
+ 0259  79                 421   	ROL ,X    		;IX      79    5~
+ 025A  69 12              422   	ROL $12,X 		;IX1     69 ff 6~
+                          423   	
+                          424   	; Rotate Right thru Carry
+ 025C  46                 425   	RORA 			;INH (A) 46    3~
+ 025D  56                 426   	RORX  	 		;INH (X) 56    3~
+ 025E  36 12              427   	ROR $12 		;DIR     36 dd 5~
+ 0260  76                 428   	ROR ,X    		;IX      76    5~
+ 0261  66 12              429   	ROR $12,X 		;IX1     66 ff 6~
+                          430   	
+                          431   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   7
+Test: MC68HC05 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          432   	; Reset Stack Pointer
+ 0263  9C                 433   	RSP 			;INH 9C 2~
+                          434   	; Return from Interrupt
+ 0264  80                 435   	RTI  	 		;INH 80 2~
+                          436   	; Return from Subroutine
+ = 00000265               437   procRts EQU *
+ 0265  81                 438   	RTS 			;INH 81 6~
+                          439   	
+                          440   	; Subtract with Carry
+ 0266  A2 12              441   	SBC #$12 		;IMM A2 ii    2~
+ 0268  B2 12              442   	SBC $12			;DIR B2 dd    3~
+ 026A  C2 12 34           443   	SBC $1234 		;EXT C2 hh ll 4~
+ 026D  F2                 444   	SBC ,X    		;IX  F2       3~
+ 026E  E2 12              445   	SBC $12,X 		;IX1 E2 ff    4~
+ 0270  D2 12 34           446   	SBC $1234,X  		;IX2 D2 ee ff 5~
+                          447   	
+                          448   	; Set Carry Bit
+ 0273  99                 449   	SEC 			;INH 99 2~
+                          450   	; Set Interrupt Mask Bit
+ 0274  9B                 451   	SEI  	 		;INH 9B 2~
+                          452   	
+                          453   	; Store Accumulator in Memory
+ 0275  B7 12              454   	STA $12			;DIR B7 dd    4~
+ 0277  C7 12 34           455   	STA $1234 		;EXT C7 hh ll 5~
+ 027A  F7                 456   	STA ,X    		;IX  F7       4~
+ 027B  E7 12              457   	STA $12,X 		;IX1 E7 ff    5~
+ 027D  D7 12 34           458   	STA $1234,X  		;IX2 D7 ee ff 6~
+                          459   	
+                          460   	; Enable IRQ, Stop Oscillator
+ 0280  8E                 461   	STOP 			;INH 8E 2
+                          462   	
+                          463   	; Store Index Register X in Memory
+ 0281  BF 12              464   	STX $12			;DIR BF ii    4~
+ 0283  CF 12 34           465   	STX $1234 		;EXT CF hh ii 5~
+ 0286  FF                 466   	STX ,X    		;IX  FF       4~
+ 0287  EF 12              467   	STX $12,X 		;IX1 EF ff    5~
+ 0289  DF 12 34           468   	STX $1234,X  		;IX2 DF ee ff 6~
+                          469   	
+                          470   	; Subtract
+ 028C  A0 12              471   	SUB #$12 		;IMM A0 ii    2~
+ 028E  B0 12              472   	SUB $12			;DIR B0 dd    3~
+ 0290  C0 12 34           473   	SUB $1234 		;EXT C0 hh ll 4~
+ 0293  F0                 474   	SUB ,X    		;IX  F0       3~
+ 0294  E0 12              475   	SUB $12,X 		;IX1 E0 ff    4~
+ 0296  D0 12 34           476   	SUB $1234,X  		;IX2 D0 ee ff 5~
+                          477   	
+                          478   	; Software Interrupt
+ 0299  83                 479   	SWI 			;INH 83 10~
+                          480   	; Transfer Accumulator to Index Register
+ 029A  97                 481   	TAX  	 		;INH 97 2~
+                          482   	
+                          483   	; Test for Negative or Zero
+ 029B  4D                 484   	TSTA 			;INH (A) 4D    3~
+ 029C  5D                 485   	TSTX  	 		;INH (X) 5D    3~
+ 029D  3D 12              486   	TST $12 		;DIR     3D dd 4~
+ 029F  7D                 487   	TST ,X 			;IX      7D    4~
+ 02A0  6D 12              488   	TST $12,X 		;IX1     6D ff 5~
+                          489   	
+                          490   	; Transfer Index Register to Accumulator
+ 02A2  9F                 491   	TXA  			;INH 9F 2~
+                          492   	; Enable Interrupt, Stop Processor
+ 02A3  8F                 493   	WAIT 			;INH 8F 2~
+                          494   
+ = 000002A4               495   INSTRUCTIONS_END EQU *  ; last location of used ROM
+                          496   
+                          497   .SUBTTL Code Examples
+                          498   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   8
+Test: MC68HC05 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          499   ;----------------------------------------------------------------------------
+                          500   ;
+ 02A4  EF EF              501           FCB LOW  ($89ABCDEF), $89ABCDEF & $EF         		; Bits [ 7: 0]
+ 02A6  CD CD              502           FCB HIGH ($89ABCDEF), ($89ABCDEF >>  8) & $FF 		; Bits [15: 8]
+ 02A8  CD CD              503           FCB BYTE2($89ABCDEF), ($89ABCDEF >>  8) & $FF 		; Bits [15: 8]
+ 02AA  AB AB              504           FCB BYTE3($89ABCDEF), ($89ABCDEF >> 16) & $FF 		; Bits [23:16]
+ 02AC  89 89              505           FCB BYTE4($89ABCDEF), ($89ABCDEF >> 24) & $ff 		; Bits [31:24]
+ 02AE  CDEF               506           FDB LWRD ($89ABCDEF), $89ABCDEF & $FFFF       		; Bits [15: 0]	    
+ 02B0  CDEF            
+ 02B2  89AB               507           FDB HWRD ($89ABCDEF), $89ABCDEF >> 16	         	; Bits [31:16]	         
+ 02B4  89AB            
+ 02B6  0034               508   	FDB PAGE ($12345678), ($12345678 & $003F0000) >> 16	; Bits [21:16]             
+ 02B8  0034            
+                          509   
+ 02BA  15 01 0D 30 31     510   _db01c	FCB  	_DB01C_LENGTH, 1,13,'012"3":; ,"', '", "', 'A', '"', ''', '', "";, 22, 25, 4 \
+ 02BF  32 22 33 22 3A  
+ 02C4  3B 20 2C 22 00  
+ 02C9  00 41 22 27 00  
+ 02CE  00              
+ = 00000015               511   _DB01C_LENGTH EQU * - _db01c
+                          512   
+ = 00000011               513   _11 SET $11
+ = 00000012               514   _12 SET $12
+ = 00000013               515   _13 SET $13
+ 02CF                     516   _db3:   FCB	_11,_12, _13, 'Z'+1, \
+                                		 %10101, %1, %101,   \
+                                                 "1234567890abcd ",  \
+                                                 'A',_db3 AND $FF,  \
+                                                 "1234567890abcde",  \
+                                                 $FF,$FF
+ 02CF  11 12 13 5B 15   
+ 02D4  01 05 31 32 33  
+ 02D9  34 35 36 37 38  
+ 02DE  39 30 61 62 63  
+ 02E3  64 20 41 CF 31  
+ 02E8  32 33 34 35 36  
+ 02ED  37 38 39 30 61  
+ 02F2  62 63 64 65 FF  
+ 02F7  FF              
+                          517   
+ 02F8  32 36 2F 30 31     518   _db09	FCB	__DATE__, __TIME__, __CENTURY__
+ 02FD  2F 32 30 32 35  
+ 0302  31 34 3A 32 36  
+ 0307  3A 32 34 15     
+                          519   
+ 030B                     520   _db10	FCB	'26/01/2025', '14:26:24', '21', \
+                                		$00
+ 030B  32 36 2F 30 31   
+ 0310  2F 32 30 32 35  
+ 0315  31 34 3A 32 36  
+ 031A  3A 32 34 32 31  
+ 031F  00              
+ 0320  0001               521   _FDB1	FDB 1
+                          522   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE   9
+Test: MC68HC05 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          523   ;----------------------------------------------------------------------------
+                          524   ;
+ 0322  001C               525   	FDB 	STRLEN("XASMAVR Macro Assembler V2.1") 
+                          526   
+ 0324  01 01              527   	FCB EXP2(0),  1		  
+ 0326  80 80              528   	FCB EXP2(7),  128	  
+ 0328  0100               529   	FDB EXP2(8),  256	  
+ 032A  0100            
+ 032C  8000               530   	FDB EXP2(15), 32768                                                             
+ 032E  8000            
+ 0330  00010000           531   	FDW EXP2(16), 65536                                                            
+ 0334  00010000        
+ 0338  00800000           532   	FDW EXP2(23), 8388608	  
+ 033C  00800000        
+ 0340  01000000           533   	FDW EXP2(24), 16777216 
+ 0344  01000000        
+ 0348  80000000           534   	FDW EXP2(31), 2147483648  
+ 034C  80000000        
+                          535   	
+ 0350  40 40              536           FCB LOG2(0),                    64 ; Illegal, out of range
+ 0352  00 00              537           FCB LOG2(1),                     0
+ 0354  07 07              538           FCB LOG2(128),                   7
+ 0356  0F 0F              539           FCB LOG2(32768),     		15
+ 0358  10 10              540           FCB LOG2(65536),     		16
+ 035A  17 17              541           FCB LOG2(8388608),     		23
+ 035C  18 18              542           FCB LOG2(16777216),     	24
+ 035E  1F 1F              543           FCB LOG2(2147483648),     	31
+ 0360  20 20              544           FCB LOG2(4294967296),     	32
+ 0362  27 27              545           FCB LOG2(549755813888),     	39
+ 0364  2F 2F              546           FCB LOG2(140737488355328),      47
+ 0366  37 37              547           FCB LOG2(36028797018963968),    55
+ 0368  3F 3F              548           FCB LOG2(9223372036854775808),  63
+ 036A  40 40              549           FCB LOG2(18446744073709551616),	64
+                          550   	
+ = 00000001               551   #define _flag1
+ = 00000001               552   .DEFINE _flag2
+ 036C  01 00              553   	FCB DEFINED(_flag1), !DEFINED(_flag1)
+ 036E  01 00              554   	FCB DEFINED(_flag2), !DEFINED(_flag2)
+                          555   
+                          556   #if DEFINED(_flag1)
+ 0370  9D                 557   	nop	      	; flag1
+                          558   #elif DEFINED(_flag2)
+                          559   #endif
+                          560   
+                          561   #if !DEFINED(_flag1)	
+                          562   #elif DEFINED(_flag2)
+ 0371  9D                 563   	nop		; flag2	
+                          564   #endif
+                          565   	
+                          566   ;-----------------------------------------------------------------,
+                          567   ; Warning: Use parenthesis in complex expressions!		  |
+ = 0000A675               568   _VAR SET $a600*256+$75a2>>8	     ;; =00A60075 NOT EXPECTED ?! |
+ 0372  A675               569   	FDB _VAR		     ;                            |
+ = 00A60075               570   _VAR SET ($a600*256)+($75a2>>8)      ;; =00a60075 expected        |
+ 0374  0075               571   	FDB LWRD(_VAR)               ;	                          |
+ 0376  00A6               572   	FDB HWRD(_VAR)               ;	                          |
+ = 0000A675               573   _VAR SET ($a600*256+$75a2)>>8        ;; =0000a675 expected        |
+ 0378  A675               574   	FDB _VAR                     ;	                          |
+                          575   ;-----------------------------------------------------------------'
+                          576   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE  10
+Test: MC68HC05 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          577   ;----------------------------------------------------------------------------
+                          578   ;
+                          579   ;			testROM
+                          580   ; ROM Test
+                          581   ;
+ = 0000037A               582   testROM EQU *
+ 037A  AE 05              583   	ldx	#INSTRUC_L-1 	;moved from end to begin       	
+ 037C                     584   tstrom1:
+ 037C  D6 03 88           585   	lda	tstrom4, x	;move into RAM for pointer addition
+ 037F  E7 22              586   	sta	$22, x		;= "_0022 FCB $DB,01,00, $CC,04,$F7"
+ 0381  5A                 587   	decx 			
+ 0382  2A F8              588   	bpl	tstrom1		;"branch if >= 0": 6 bytes
+                          589   
+ 0384  4F                 590   	clra 			;Init checksum accu
+ 0385                     591   tstrom2:
+ 0385  5F                 592   	clrx			;Init Pointer in RAM = 0
+                          593   
+                          594   ; Test the ROM using pointer in RAM
+                          595   ; by processing the two instructions moved from 'tstrom4'
+ 0386                     596   tstrom3:
+ 0386  BC 22              597   	JMP	$0022		;direct addressing
+                          598   ;	...............
+                          599   ;;ha;;	FCB $CC,$00,$22		;;ha;; "JMP $0022" as 16bit address
+                          600   ;	...............
+                          601   
+                          602   ;------------------------------
+                          603   ; The two instructions below	      $22 $23 $24  $25 $26 $27 = RAM locations
+                          604   ; reside in RAM $22..$27 = "_0022 FCB $DB, 01, 00, $CC, 04,$F7"
+                          605   ;           RAM $23..$24 = $0100 (l6bit offset into ROM, allows easy increments)
+ 0388                     606   tstrom4:
+ 0388  DB 01 00           607   	add 	ROMSTART, x	;see Listing -> 04F1  DB 01 00 
+ 038B  CC 03 8E           608   	jmp 	tstrom5		;see Listing -> 04F4  CC 04 F7
+ = 00000006               609   INSTRUC_L EQU * - tstrom4	;number of bytes these two instructions occupy	
+                          610   ;------------------------------
+                          611   
+                          612   ; Add up ROM bytes $0100..$0EFF
+ 038E                     613   tstrom5:
+ 038E  5C                 614   	incx			;advance pointer residing in RAM
+ 038F  26 F5              615   	bne	tstrom3		;$0000..$00FF done?
+                          616   				;count 256 chunks via ROMSTART ptr in RAM
+ 0391  3C 23              617   	inc 	$23		;$23=HIGH(ROMSTART)-Operand of "add ROMSTART, x"
+ 0393  BE 23              618   	LDX 	$0023		;direct addressing
+                          619   ;	...............
+                          620   ;;ha;;	FCB $CE,$00,$23		;;ha;; "LDX $0023" as 16bit address
+                          621   ;	...............
+ 0395  A3 0F              622   	cpx 	#$0F		;X=$23=HIGH(ROMSTART)-Operand ROM $0100..$0EFF done?
+ 0397  26 EC              623   	bne  	tstrom2		;not ready yet, loop for next
+                          624   				;$0100..$0EFF done.
+                          625   
+                          626   ; Add up the remaining $0F00..$0F38
+ 0399  AE 0E              627   	ldx 	#MANUF_MODE_L-1	;add up the remaining $0F00..$0F38
+ 039B                     628   tstrom6:
+ 039B  DB 0F 00           629   	add 	MANUF_MODE, x
+ 039E  5A                 630   	decx 
+ 039F  2A FA              631   	bpl 	tstrom6		;"branch if >= 0": $38 bytes
+                          632   
+                          633   ;add up the remaining $0FF8..$0FFF
+ 03A1  AE 07              634   	ldx 	#VECTORS_L-1		
+ 03A3                     635   tstrom7:
+ 03A3  DB 0F F8           636   	add 	VECTORS, x
+ 03A6  5A                 637   	decx 
+ 03A7  2A FA              638   	bpl 	tstrom7		;"branch if >= 0": 8 bytes
+                          639   	 
+                          640   ; The chunk $80..$FF still has to be done
+ 03A9  AE 7F              641   	ldx 	#ROMPAGE0_SIZE-1		
+ 03AB                     642   tstrom8:
+ 03AB  EB 80              643   	add 	ROMPAGE0, x		
+ 03AD  5A                 644   	decx			
+ 03AE  2A FB              645   	bpl 	tstrom8		;"branch if >= 0": $80 bytes
+ 03B0  81                 646   	rts			;"#\%-SSSEUFZ!!!" Now all ROM is added up!
+                          647   
+                          648   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE  11
+Test: MC68HC05 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          649   ;----------------------------------------------------------------------------
+                          650   ;
+                          651   ;			docmd
+                          652   ;
+ = 000003B1               653   docmd EQU *
+ 03B1  B7 4A              654   	sta 	tmp_65		;Save command $ED..$FF
+ 03B3  A0 ED              655   	sub 	#-(CMDTAB_L/3)  ;$ED...$FF? (SIZEOF(jmp) = 3bytes) 
+ 03B5  B7 4B              656   	sta	tmpaux3		;$ED..$FF --> 0..18 
+ 03B7  48                 657   	lsla			;*2
+ 03B8  BB 4B              658   	add 	tmpaux3		;+1 (3 bytes per 'jmp' in 'docmd1' table)
+ 03BA  97                 659   	tax			;load index with table offset
+ 03BB  DC 03 BE           660   	jmp 	cmdtab, x	;jump to routine
+                          661   	
+ 03BE  CC 03 F7           662   cmdtab:	jmp 	EDcmd		
+ 03C1  CC 03 F7           663   	jmp	EEcmd		
+ 03C4  CC 03 F7           664   	jmp	EFcmd		
+ 03C7  CC 03 F7           665   	jmp 	F0cmd		
+ 03CA  CC 03 F7           666   	jmp	F1cmd		
+ 03CD  CC 03 F7           667   	jmp	F2cmd		
+ 03D0  CC 03 F7           668   	jmp 	F3cmd		
+ 03D3  CC 03 F7           669   	jmp	F4cmd		
+ 03D6  CC 03 F7           670   	jmp	F5cmd		
+ 03D9  CC 03 F7           671   	jmp 	F6cmd		
+ 03DC  CC 03 F7           672   	jmp	F7cmd		
+ 03DF  CC 03 F7           673   	jmp	F8cmd		
+ 03E2  CC 03 F7           674   	jmp 	F9cmd		
+ 03E5  CC 03 F7           675   	jmp	FAcmd		
+ 03E8  CC 03 F7           676   	jmp	FBcmd		
+ 03EB  CC 03 F7           677   	jmp	FCcmd		
+ 03EE  CC 03 F7           678   	jmp 	FDcmd		
+ 03F1  CC 03 F7           679   	jmp 	FEcmd		
+ 03F4  CC 03 F7           680   	jmp	FFcmd		
+ = 00000039               681   CMDTAB_L EQU * - cmdtab
+                          682   ;	---
+ 03F7                     683   EDcmd:
+ 03F7                     684   EEcmd:
+ 03F7                     685   EFcmd:
+ 03F7                     686   F0cmd:
+ 03F7                     687   F1cmd:
+ 03F7                     688   F2cmd:
+ 03F7                     689   F3cmd:
+ 03F7                     690   F4cmd:
+ 03F7                     691   F5cmd:
+ 03F7                     692   F6cmd:
+ 03F7                     693   F7cmd:
+ 03F7                     694   F8cmd:
+ 03F7                     695   F9cmd:
+ 03F7                     696   FAcmd:
+ 03F7                     697   FBcmd:
+ 03F7                     698   FCcmd:
+ 03F7                     699   FDcmd:
+ 03F7                     700   FEcmd:
+ 03F7  81                 701   FFcmd:	rts
+                          702   
+                          703   ;------------------------------------------------------------------------------
+                          704   ;
+                          705   ;	Macros
+                          706   ;
+                          707   .MACRO Addition 
+                          708   	lda 	#@0	; param0		
+                          709   	add 	#@1	; param1
+                          710   .ENDM
+                          711   
+ 03F8                  +  712   	ADDITION $10, 20
+ 03F8  A6 10           +  713   	lda 	#$10 
+ 03FA  AB 14           +  714   	add 	#20 
+ 03FC  C7 01 00           715   	STA 	$100 
+                          716   .EVEN
+ 0400                  +  717   	ADDITION $12, 15
+ 0400  A6 12           +  718   	lda 	#$12 
+ 0402  AB 0F           +  719   	add 	#15 
+ 0404  C7 01 01           720   	STA 	$101
+ 0407  83                 721   	SWI
+                          722   
+                          723   ;----------------------------------------------------------------------------
+                          724   ;
+                          725   ;			MNUFACTURING MODE2
+                          726   ;
+                          727   ; Reserved area (selfcheck ROM, see MC6805R_U2 (Jan1984) data sheet)
+                          728   ; Special burn-in mode2
+                          729   ;
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE  12
+Test: MC68HC05 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+ 0F00                     730   	ORG MANUF_MODE
+                          731   
+ = 00000F00               732   manufMod2 EQU *
+ 0F00  10 04              733   	bset  	_KYBCLK_, DDRA  ;PORTA bit0 = output
+                          734   
+ 0F02                     735   manufMod2_1:
+ 0F02  10 00              736   	bset  	_KYBCLK_, PORTA	;KYBCLK="L"
+ 0F04  4F                 737   	clra			;2048us delay (=2048/MCYCLE)
+ 0F05  4A                 738   	deca			
+ 0F06  26 FD              739   	bne   	*-1
+ 0F08  11 00              740   	bclr  	_KYBCLK_, PORTA	;KYBCLK="H"
+ 0F0A  4A                 741   	deca
+ 0F0B  26 FD              742   	bne   	*-1		;2048us delay
+ 0F0D  20 F3              743   	bra   	manufMod2_1	;Create a KYBCLK wave 
+ = 0000000F               744   MANUF_MODE_L EQU * - MANUF_MODE	;Length of manufacturing mode procs
+                          745   
+ = 00000029               746   ROM_AVAIL EQU	ROMCHECKSTART-* ;Free ROM space
+                          747   
+                          748   .EJECT
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE  13
+Test: MC68HC05 Instruction set
+Code Examples
+
+ LOC   OBJ               LINE   SOURCE
+
+                          749   ;----------------------------------------------------------------------------
+                          750   ;
+                          751   ; Checksum byte (to be inserted before PROM-programming)
+                          752   ;
+                          753   ;         ....##.. .#####..
+                          754   ;         ...##... ##...##.
+                          755   ;         ..##.... .....##.
+                          756   ;         .##..... ....##..
+                          757   ;         ##..##.. ...##...
+                          758   ;         ##..##.. ..##....
+                          759   ;         #######. .##.....
+                          760   ;         ....##.. ##......
+                          761   ;         ....##.. #######.
+                          762   ;
+ 0F38                     763   	ORG	ROMCHECKSTART
+ 0F38  42                 764   chksum	FCB	$42      	  ; ..why not use "$42" here ;-)
+                          765   
+                          766   ;----------------------------------------------------------------------------
+                          767   ;
+                          768   ;			Vector Table (dummy)
+                          769   ;
+ 0FF8                     770   	ORG	VECTORS
+                          771   
+ 0FF8  0080               772   	FDB   	info			; Timer INT
+ 0FFA  0080               773   	FDB   	info			; externat INT
+ 0FFC  0080               774   	FDB   	info			; SWI
+ 0FFE  0100               775   	FDB   	MC68HC05_instructions	; Hardware Reset Vector
+                          776   
+ = 00000008               777   VECTORS_L EQU * - VECTORS		; Size of vector area
+                          778   
+                          779   ;---------------------------------------------------------------------------
+                          780   .IF INSTRUCTIONS_END >= ROM_SIZE
+                          782   .ENDIF
+                          783   	END
+
+USER SYMBOLS
+
+_11 . . . . . . . .  0011 A  _12 . . . . . . . .  0012 A  _13 . . . . . . . .  0013 A  _2345678901234567890 0098 C  
+_CAP_LED_ . . . . .  0003 A  _db01c. . . . . . .  02BA C  _DB01C_LENGTH . . .  0015 A  _db09 . . . . . . .  02F8 C  
+_db10 . . . . . . .  030B C  _db3. . . . . . . .  02CF C  _FDB1 . . . . . . .  0320 C  _flag1. . . . . . .  0001 A  
+_flag2. . . . . . .  0001 A  _KYBCLK_. . . . . .  0000 A  _KYBDAT_. . . . . .  0002 A  _l1 . . . . . . . .  0135 C  
+_NUM_LED_ . . . . .  0005 A  _SCR_LED_ . . . . .  0004 A  _SYSCLK_. . . . . .  0001 A  _VAR. . . . . . . .  A675 A  
+altprint. . . . . .  0042 C  CAP_LED . . . . . .  0008 A  chksum. . . . . . .  0F38 C  cmdparm . . . . . .  003C C  
+cmdtab. . . . . . .  03BE C  CMDTAB_L. . . . . .  0039 A  DDRA. . . . . . . .  0004 C  DDRB. . . . . . . .  0005 C  
+DDRC. . . . . . . .  0006 C  delay_count . . . .  0043 C  docmd . . . . . . .  03B1 A  EDcmd . . . . . . .  03F7 C  
+EEcmd . . . . . . .  03F7 C  EFcmd . . . . . . .  03F7 C  F0cmd . . . . . . .  03F7 C  F1cmd . . . . . . .  03F7 C  
+F2cmd . . . . . . .  03F7 C  F3cmd . . . . . . .  03F7 C  F4cmd . . . . . . .  03F7 C  F5cmd . . . . . . .  03F7 C  
+F6cmd . . . . . . .  03F7 C  F7cmd . . . . . . .  03F7 C  F8cmd . . . . . . .  03F7 C  F9cmd . . . . . . .  03F7 C  
+FAcmd . . . . . . .  03F7 C  FBcmd . . . . . . .  03F7 C  FCcmd . . . . . . .  03F7 C  FDcmd . . . . . . .  03F7 C  
+FEcmd . . . . . . .  03F7 C  FFcmd . . . . . . .  03F7 C  info. . . . . . . .  0080 C  INFO_LEN. . . . . .  0018 A  
+INSTRUC_L . . . . .  0006 A  INSTRUCTIONS_END. .  02A4 A  IOAREA. . . . . . .  0000 A  IOAREA_SIZE . . . .  0010 A  
+KYBCLK. . . . . . .  0001 A  KYBDAT. . . . . . .  0004 A  lastchr . . . . . .  0045 C  MANUF_MODE. . . . .  0F00 A  
+MANUF_MODE_L. . . .  000F A  manufMod2 . . . . .  0F00 A  manufMod2_1 . . . .  0F02 C  MC68HC05_instruction 0100 C  
+mtrxSenseIndex. . .  0046 C  mtrxSenseNew. . . .  0047 C  mtrxSenseOld. . . .  0048 C  mtxB. . . . . . . .  003F C  
+mtxC. . . . . . . .  003E C  mtxFld. . . . . . .  002B C  MTXFLD_L. . . . . .  0010 A  NUM_LED . . . . . .  0020 A  
+outbuf. . . . . . .  004C C  OUTBUF_L. . . . . .  0011 A  PORTA . . . . . . .  0000 C  PORTA_MASK. . . . .  00C2 A  
+PORTB . . . . . . .  0001 C  PORTC . . . . . . .  0002 C  PORTD . . . . . . .  0003 C  procRts . . . . . .  0265 A  
+RAM_SIZE. . . . . .  0040 A  RAMEND. . . . . . .  0080 A  RAMSTART. . . . . .  0040 A  RAMUSER . . . . . .  0020 A  
+M68HC05 Macro-Assembler, Version 2.1                      26/01/2025  PAGE  14
+Test: MC68HC05 Instruction set
+Code Examples
+
+RAMUSER_SIZE. . . .  0030 A  respbyt . . . . . .  003D C  ROM_AVAIL . . . . .  0029 A  ROM_SIZE. . . . . .  0F00 A  
+ROMCHECK_SIZE . . .  00C0 A  ROMCHECKSTART . . .  0F38 A  ROMPAGE0. . . . . .  0080 A  ROMPAGE0_SIZE . . .  0080 A  
+ROMSTART. . . . . .  0100 A  SCR_LED . . . . . .  0010 A  set3Modtbl. . . . .  0007 C  SET3MODTBL_L. . . .  0020 A  
+specialkey. . . . .  0040 C  STACK . . . . . . .  0078 A  STACK_SIZE. . . . .  0008 A  SYSCLK. . . . . . .  0002 A  
+TEST_VECTORS. . . .  0EFA A  testROM . . . . . .  037A A  tmp_65. . . . . . .  004A C  tmpaux1 . . . . . .  0044 C  
+tmpaux2 . . . . . .  0049 C  tmpaux3 . . . . . .  004B C  tmpcnt. . . . . . .  003B C  tstrom1 . . . . . .  037C C  
+tstrom2 . . . . . .  0385 C  tstrom3 . . . . . .  0386 C  tstrom4 . . . . . .  0388 C  tstrom5 . . . . . .  038E C  
+tstrom6 . . . . . .  039B C  tstrom7 . . . . . .  03A3 C  tstrom8 . . . . . .  03AB C  typmatic. . . . . .  0041 C  
+VECTORS . . . . . .  0FF8 A  VECTORS_L . . . . .  0008 A  VECTORS_SIZE. . . .  0008 A  XASM6805. . . . . .  0001 A  
+
+ASSEMBLY COMPLETE,   NO ERRORS
