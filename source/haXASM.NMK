@@ -1,0 +1,355 @@
+## haXASM - Cross-Assembler for 8bit Microprocessors
+## haXASM.nmk - NMAKE Developer script file.
+## (c)2024 by helmut altmann
+
+#------------------------------------------------------------------------------
+# NMake file for the 32bit Windows XP/10 Desktop-App Project: PROJ.EXE
+#
+#  ---------------------------------------------------------
+# |                  Copyright (c)2024 by ha.               |
+#  ---------------------------------------------------------
+#                                                                 
+#     ---------------------------------
+#    |  Invocation:  NMAKE haXASM.NMK  |  02.06.2023 ha
+#     ---------------------------------
+#
+#    32bit-Version Build for XP, Vista, Windows 10, ... 
+#    C:\Program Files (x86)\Microsoft Visual Studio\2010\BuildTools: XP SP3
+#     (Microsoft (R) Macro Assembler Version 10.00.30319.01)
+#     Microsoft (R) Macro Assembler Version 14.28.29910.0 <- Better use ML from VS 2019!
+#     Microsoft (R) C/C++-Optimierungscompiler Version 16.00.30319.01 for 80x86 XP
+#     Microsoft (R) Incremental Linker Version 10.00.30319.01
+#     Microsoft (R) Program Maintenance Utility, Version 10.00.30319.01
+#
+#    64bit-Version Build for Windows 10 and greater
+#      Visual Studio 2019 Developer Command Prompt v16.8.4
+#      [vcvarsall.bat] Environment initialized for: 'x64'
+#      Copyright (c) 2020 Microsoft Corporation
+#      C:\Program Files (x86)\Microsoft Visual Studio\2019\Community>
+#     Microsoft (R) Macro Assembler (x64) 'ML64' Version 14.28.29336.0
+#     Microsoft (R) C/C++-Optimierungscompiler Version 19.28.29336 for x64
+#     Microsoft (R) Incremental Linker Version 14.28.29336.0
+#     Microsoft (R) Program Maintenance Utility, Version 14.28.29336.0
+#
+# Products: XASM8042.exe XASM6805.exe XASM6802.exe XASMAVR.exe                                                        
+# Module:   PROJ.nmk                                                        
+#
+#------------------------------------------------------------------------------
+
+#LST = .\LST\NUL                          
+#LST = .\LST\$*
+#OBJ = .\OBJ\ 
+
+PROJ = XASM                     # Cross Assembler
+FOLDER = C:\Temp600\__\         # Folder prefix to the project,
+                                #  using 2010/2019 MS Build-tools.
+#
+# Set a flag in an NMAKE Makefile if the cl compiler version is 16.
+# Note that cl [/?] prints the version information to the standard error stream
+#  and the help text to the standard output.
+#  To be able to check the version with the findstr command one must first
+#  redirect stderr to stdout using 2>&1.
+# 
+# -------------------------------------------------
+# Determine the assembler/compiler version in use: |
+#  Microsoft Visual Studio 2019 (Windows 10 64bit) |
+#   ML64 Version 14.28.29336.0 for x64             |
+#   CL Version 19.28.29336 for x64                 |
+#  Microsoft Visual Studio 2019 (Windows 10 32bit) |
+#   ML Version 14.28.29910.0 for x86               |
+#   CL Version 19.28.29910 for x86                 |
+#  Microsoft Visual Studio 2010 (WindowsXP 32bit)  |
+#   ML Version 14.28.29910.0 for x86 (=VS 2019)    |
+#   CL Version 16.00.30319.01 for 80x86            |
+# -------------------------------------------------
+!IF ([ml64 2>&1 | findstr /C:"x64" > nul] == 0) 
+FLAG = "64bit Version"         # 64bit for Windows 10
+!ELSEIF ([cl 2>&1 | findstr /C:"Version 16" > nul] == 0)
+FLAG = "32bit XP Version"      # 32bit for XP and Win10
+OS = _XP
+!ELSE 
+FLAG = "32bit Version"         # 32bit for Windows 10
+OS =
+!ENDIF
+# Nice trick to display the current Version $(FLAG)
+# Since Nmake does not recognize any console commands
+# at this point within the script.
+!IF ([ECHO 2>&1 ---BUILD---$(FLAG)])
+!ENDIF
+!IF ([ECHO. 2>&1])
+!ENDIF
+
+# -------------------
+# Global tool options
+# -------------------
+CFLAGS=/c /nologo /EHsc /Od 
+#CFLAGS=/c /nologo /EHsc /O2 
+#CFLAGS=/c /nologo /EHsc /Ot 
+LFLAGS=/nologo /INCREMENTAL
+
+LIBS= shlwapi.lib
+
+# -----------------------------------------------------------------------------
+#       Macro definitions of the project object module depedencies
+# -----------------------------------------------------------------------------
+OBJECTSUPI42 =  $(FOLDER)$(PROJ).obj $(FOLDER)assgn.obj $(FOLDER)pass1.obj \
+                $(FOLDER)pass2.obj $(FOLDER)finish.obj $(FOLDER)workst.obj \
+                $(FOLDER)expr.obj $(FOLDER)lstng.obj $(FOLDER)dcomp.obj \
+                $(FOLDER)label.obj $(FOLDER)edit.obj \
+                $(FOLDER)opcodeUpi42.obj $(FOLDER)bytvalUPI42.obj \
+                $(FOLDER)ifelse.obj $(FOLDER)macro.obj $(FOLDER)deviceAVR.obj
+          
+OBJECTS68HC05 = $(FOLDER)$(PROJ).obj $(FOLDER)assgn.obj $(FOLDER)pass1.obj \
+                $(FOLDER)pass2.obj $(FOLDER)finish.obj $(FOLDER)workst.obj \
+                $(FOLDER)expr.obj $(FOLDER)lstng.obj $(FOLDER)dcomp.obj \
+                $(FOLDER)label.obj $(FOLDER)edit.obj \
+                $(FOLDER)opcode68HC05.obj $(FOLDER)bytval68HC05.obj \
+                $(FOLDER)ifelse.obj $(FOLDER)macro.obj $(FOLDER)deviceAVR.obj
+
+OBJECTS6802 =   $(FOLDER)$(PROJ).obj $(FOLDER)assgn.obj $(FOLDER)pass1.obj \
+                $(FOLDER)pass2.obj $(FOLDER)finish.obj $(FOLDER)workst.obj \
+                $(FOLDER)expr.obj $(FOLDER)lstng.obj $(FOLDER)dcomp.obj \
+                $(FOLDER)label.obj $(FOLDER)edit.obj \
+                $(FOLDER)opcode6802.obj $(FOLDER)bytval6802.obj \
+                $(FOLDER)ifelse.obj  $(FOLDER)macro.obj $(FOLDER)deviceAVR.obj
+
+
+OBJECTSAVR =    $(FOLDER)$(PROJ).obj $(FOLDER)assgn.obj $(FOLDER)pass1.obj \
+                $(FOLDER)pass2.obj $(FOLDER)finish.obj $(FOLDER)workst.obj \
+                $(FOLDER)expr.obj $(FOLDER)lstng.obj $(FOLDER)dcomp.obj \
+                $(FOLDER)label.obj $(FOLDER)edit.obj \
+                $(FOLDER)opcodeAVR.obj $(FOLDER)bytvalAVR.obj \
+                $(FOLDER)ifelse.obj $(FOLDER)macro.obj $(FOLDER)deviceAVR.obj
+
+CLEAN =  $(FOLDER)*.ilk
+
+#---------------
+# INFERENCE RULE
+#---------------
+#.asm.obj:
+#       @$(AS) $(AFLAGS) /Fo$(FOLDER)$(@B).obj /Fl$(FOLDER)$(@B).lst $(FOLDER)$(@B).asm
+
+.cpp.obj:
+        @CL $(CFLAGS) /Fo$(FOLDER)$(@B).obj $(FOLDER)$(@B).cpp
+
+# -------------------------------------------
+# PSEUDO TARGETs POINTING TO THE REAL TARGETs
+# -------------------------------------------
+_all:   $(FOLDER)XASM8042.exe \
+        $(FOLDER)XASM6805.exe \
+        $(FOLDER)XASM6802.exe \
+        $(FOLDER)XASMAVR.exe
+
+# -----------------------------------------------------------------------------
+#
+#        For $(PROJ).EXE: List of dependencies for every object file
+#
+$(FOLDER)$(PROJ).obj:      $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)workst.obj:       $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)assgn.obj:        $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)pass1.obj:        $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)pass2.obj:        $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)finish.obj:       $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)dcomp.obj:        $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)edit.obj:         $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)lstng.obj:        $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)label.obj:        $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)expr.obj:         $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)opcodeUPI42.obj:  $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)bytvalUpi42.obj:  $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)bytval68HC05.obj: $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)opcode68HC05.obj: $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)opcode6802.obj:   $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)bytval6802.obj:   $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)opcodeAVR.obj:    $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)bytvalAVR.obj:    $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)ifelse.obj:       $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)macro.obj:        $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h
+
+$(FOLDER)deviceAVR.obj:     $(FOLDER)$(@B).cpp $(FOLDER)equate.h $(FOLDER)extern.h $(FOLDER)devAVR.h
+
+#------------------------------------------------------------------------------
+#
+#               $(PROJ) Target build (XASM8042)
+#
+$(FOLDER)$(PROJ)8042.exe:       $(OBJECTSUPI42)
+#
+# Detect if "$(@F)" is running. It must be terminated before rebuild.
+# ":" should appear in TASKLIST output only if the task is NOT found,
+# Hence FIND will set the ERRORLEVEL to 0 for 'not found' and 1 for 'found'.
+#
+!IF ([tasklist /NH /FI "IMAGENAME eq $(PROJ)8042.exe" | FIND ":" > nul] == 1)
+        -TASKKILL /F /IM $(@B).exe > nul
+!ENDIF
+!IF ($(FLAG) == "32bit XP Version")     # For XP and Win10 or greater
+        LINK $(LFLAGS) /OUT:$(FOLDER)$(@B).exe $** $(LIBS) >$(FOLDER)$(@B).link
+        DEL $(CLEAN)
+        @ECHO " $(FOLDER)$(@B).exe (32bit) has been built."
+        @ECHO.
+!ELSE                                   # For Win10 or greater only
+        LINK $(LFLAGS) /OUT:$(FOLDER)$(@B)_64.exe $** $(LIBS) >$(FOLDER)$(@B)_64.link
+        DEL $(CLEAN)
+        @ECHO " $(FOLDER)$(@B)_64.exe (64bit) has been built."
+        @ECHO.
+!ENDIF
+
+#------------------------------------------------------------------------------
+#
+#               $(PROJ) Target build (XASM6805)
+#
+$(FOLDER)$(PROJ)6805.exe:       $(OBJECTS68HC05)
+#
+# Detect if "$(@F)" is running. It must be terminated before rebuild.
+# ":" should appear in TASKLIST output only if the task is NOT found,
+# Hence FIND will set the ERRORLEVEL to 0 for 'not found' and 1 for 'found'.
+#
+!IF ([tasklist /NH /FI "IMAGENAME eq $(PROJ)6805.exe" | FIND ":" > nul] == 1)
+        -TASKKILL /F /IM $(@B).exe > nul
+!ENDIF
+!IF ($(FLAG) == "32bit XP Version")     # For XP and Win10 or greater
+        LINK $(LFLAGS) /OUT:$(FOLDER)$(@B).exe $** $(LIBS) >$(FOLDER)$(@B).link
+        DEL $(CLEAN)
+        @ECHO " $(FOLDER)$(@B).exe (32bit) has been built."
+        @ECHO.
+!ELSE                                   # For Win10 or greater only
+        LINK $(LFLAGS) /OUT:$(FOLDER)$(@B)_64.exe $** $(LIBS) >$(FOLDER)$(@B)_64.link
+        DEL $(CLEAN)
+        @ECHO " $(FOLDER)$(@B)_64.exe (64bit) has been built."
+        @ECHO.
+!ENDIF
+
+#------------------------------------------------------------------------------
+#
+#               $(PROJ) Target build (XASM6802)
+#
+$(FOLDER)$(PROJ)6802.exe:       $(OBJECTS6802)
+#
+# Detect if "$(@F)" is running. It must be terminated before rebuild.
+# ":" should appear in TASKLIST output only if the task is NOT found,
+# Hence FIND will set the ERRORLEVEL to 0 for 'not found' and 1 for 'found'.
+#
+!IF ([tasklist /NH /FI "IMAGENAME eq $(PROJ)6802.exe" | FIND ":" > nul] == 1)
+        -TASKKILL /F /IM $(@B).exe > nul
+!ENDIF
+!IF ($(FLAG) == "32bit XP Version")     # For XP and Win10 or greater
+        LINK $(LFLAGS) /OUT:$(FOLDER)$(@B).exe $** $(LIBS) >$(FOLDER)$(@B).link
+        DEL $(CLEAN)
+        @ECHO " $(FOLDER)$(@B).exe (32bit) has been built."
+        @ECHO.
+!ELSE                                   # For Win10 or greater only
+        LINK $(LFLAGS) /OUT:$(FOLDER)$(@B)_64.exe $** $(LIBS) >$(FOLDER)$(@B)_64.link
+        DEL $(CLEAN)
+        @ECHO " $(FOLDER)$(@B)_64.exe (64bit) has been built."
+        @ECHO.
+!ENDIF
+
+
+#------------------------------------------------------------------------------
+#
+#               $(PROJ) Target build (XASMAVR)
+#
+$(FOLDER)$(PROJ)AVR.exe:       $(OBJECTSAVR)
+#
+# Detect if "$(@F)" is running. It must be terminated before rebuild.
+# ":" should appear in TASKLIST output only if the task is NOT found,
+# Hence FIND will set the ERRORLEVEL to 0 for 'not found' and 1 for 'found'.
+#
+!IF ([tasklist /NH /FI "IMAGENAME eq $(PROJ)AVR.exe" | FIND ":" > nul] == 1)
+        -TASKKILL /F /IM $(@B).exe > nul
+!ENDIF
+!IF ($(FLAG) == "32bit XP Version")     # For XP and Win10 or greater
+        LINK $(LFLAGS) /OUT:$(FOLDER)$(@B).exe $** $(LIBS) >$(FOLDER)$(@B).link
+        DEL $(CLEAN)
+        @ECHO " $(FOLDER)$(@B).exe (32bit) has been built."
+!ELSE                                   # For Win10 or greater only
+        LINK $(LFLAGS) /OUT:$(FOLDER)$(@B)_64.exe $** $(LIBS) >$(FOLDER)$(@B)_64.link
+        DEL $(CLEAN)
+        @ECHO " $(FOLDER)$(@B)_64.exe (64bit) has been built."
+!ENDIF
+
+
+##ha### *********************************************************************
+##ha### ---------------------------------------------------------------------
+##ha###     Make file for ASM42 UPI-41/42 CROSS-ASSEMBLER V1.xx  (23.09.1992)
+##ha###
+##ha###                "Those were the days, my friend,"
+##ha###                  "we thought that never end."
+##ha###
+##ha### ---------------------------------------------------------------------
+##ha###LST = .\LST\NUL 
+##ha##LST = .\LST\$*
+##ha##OBJ = .\OBJ\ 
+##ha##OBJi42 = .\OBJi42\ 
+##ha##
+##ha### Assembler and Linker Options
+##ha##MASMOPT = /B63 /N
+##ha### LINKOPT = /MAP
+##ha##LINKOPT =
+##ha##
+##ha##$(OBJ)xasmmain.obj:       $*.asm sysmacro.inc extrn.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)assgn.obj:  $*.asm sysmacro.inc extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)pass1.obj:  $*.asm sysmacro.inc extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)pass2.obj:  $*.asm sysmacro.inc extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)finish.obj: $*.asm sysmacro.inc extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)dcomp.obj:  $*.asm sysmacro.inc extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)label.obj:  $*.asm extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)edit.obj:           $*.asm sysmacro.inc extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)lstng.obj:  $*.asm sysmacro.inc extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)expr.obj:           $*.asm extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJ)workst.obj: $*.asm equate.inc
+##ha##  MASM  $(MASMOPT) $*.asm, $(OBJ)$*, $(LST);
+##ha##
+##ha##$(OBJi42)opcode.obj:      $*.i42 extrn.inc
+##ha##  MASM  $(MASMOPT) $*.i42, $(OBJi42)$*, $(LST);
+##ha##
+##ha##$(OBJi42)bytval.obj:      $*.i42 extrn.inc equate.inc
+##ha##  MASM  $(MASMOPT) $*.i42, $(OBJi42)$*, $(LST);
+##ha##
+##ha### -----------------------------------------------------------------------------
+##ha###                             ASM42-LINK
+##ha### -----------------------------------------------------------------------------
+##ha##asm42.EXE: $(OBJ)xasmmain.obj $(OBJ)assgn.obj $(OBJ)pass1.obj $(OBJ)pass2.obj \
+##ha##     $(OBJ)finish.obj $(OBJi42)opcode.obj $(OBJ)expr.obj $(OBJ)lstng.obj \
+##ha##     $(OBJ)dcomp.obj $(OBJ)label.obj $(OBJ)edit.obj $(OBJi42)bytval.obj \
+##ha##     $(OBJ)workst.obj
+##ha##  LINK $(LINKOPT) @$*.lnk
