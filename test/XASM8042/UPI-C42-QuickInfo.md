@@ -6,15 +6,15 @@ You will end up with a listing at `mykbcproj.LST` of the source file,
 and with `mykbcproj.hex` in Intel HEX format. Optionally `mykbcproj.bin` can be generated.    
 
 #### List File Formatting Directives
-.TITLE text.............................    Title in page header  
-.SUBTTL text.........................       Subtitle in page header  
-.PAGELENGTH(number).......  		    Lines per page   
-.PAGEWIDTH(number) .........   		    Colums per page  
-.EJECT...................................   New listing page ejected ('FormFeed')  
-.SYMBOLS............................        Symbol map appended in listing  
-.NOSYMBOLS ......................           Listing without symbol map (default)  
-.NOLIST.................................    Suppress source lines in listing  
-.LIST ..................................... Show source lines in listing (default)  
+.TITLE text................................    	Title in page header  
+.SUBTTL text............................       	Subtitle in page header  
+.PAGELENGTH(number)......  			Lines per page   
+.PAGEWIDTH(number) .......   			Colums per page  
+.EJECT........................................      	New listing page ejected ('FormFeed')  
+.SYMBOLS................................           	Symbol map appended in listing  
+.NOSYMBOLS ........................          	Listing without symbol map (default)  
+.NOLIST.....................................	Suppress source lines in listing  
+.LIST ...........................................	Show source lines in listing (default)  
 
 #### Commandline options:
 
