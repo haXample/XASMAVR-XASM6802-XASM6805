@@ -38,9 +38,9 @@ XASM6802 [/options] srcfile.asm | srcfile.s
 
 #### Other directives
 [symbol:]...    FCB...... expr,[[expr],["string"],['c'],...]...  ;Form Constant Byte (Allocates bytes)  
-[symbol:]...    FDB...... expr,[[expr],...].......................  ;Form Double Byte Constant (Allocates Words)  
-[symbol:]...    FDW.....  expr,[[expr],...].......................  ;Form Double Word Constant (Allocates Dwords)  
-[symbol:]...    RMB.....  expr,[[expr],...].......................  ;Reserve Memory Block (Defines storage space)  
+[symbol:]...    FDB...... expr,[[expr],...]..............................  ;Form Double Byte Constant (Allocates Words)  
+[symbol:]...    FDW.....  expr,[[expr],...]..............................  ;Form Double Word Constant (Allocates Dwords)  
+[symbol:]...    RMB.....  expr,[[expr],...]..............................  ;Reserve Memory Block (Defines storage space)  
 
 ...................... ORG...    expr... ;Sets the location counter to expr.  
 constant....      EQU...    expr... ;Assigns expr constant (silently truncated to 16bit).  
