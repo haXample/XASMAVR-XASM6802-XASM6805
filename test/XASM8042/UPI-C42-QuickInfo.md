@@ -33,13 +33,13 @@ XASM8042 [/options] srcfile.asm | srcfile.s
 
 #### Other directives
 [symbol:]...    DB...... expr,[[expr],["string"],['c'],...]...    ;Define Byte (Allocates bytes)  
-[symbol:]...    DW.....  expr,[[expr],...]....................... ;Define Word 32bit Constant (truncated if >32bit)  
-[symbol:]...    DS...... expr,[[expr],...]....................... ;Define storage space  
+[symbol:]...    DW.....  expr,[[expr],...].............................. ;Define Word 32bit Constant (truncated if >32bit)  
+[symbol:]...    DS...... expr,[[expr],...].............................. ;Define storage space  
 
-................. ORG...    expr... ;Sets the location counter to expr.  
+...................... ORG...    expr... ;Sets the location counter to expr.  
 constant....      EQU...    expr... ;Assigns expr constant (silently truncated to 16bit).  
-symbol......      SET....   expr... ;Assign a redefinable symbol equal to an 16bit expression (truncated to 16bit)  
-................. END.............. ;Marks the end of a program.
+symbol.......      SET....   expr.... ;Assign a redefinable symbol equal to an 16bit expression (truncated to 16bit)  
+...................... END................ ;Marks the end of a program.
 
 Directives must be given at start of the source line.  
 Symbols (Labels) end with colon ':'.  
@@ -100,11 +100,11 @@ Example Listing
  BYTE2(expression)......  is the same function as HIGH (DB DW directive)   
  BYTE3(expression)......  returns the third byte of an expression  
  BYTE4(expression)......  returns the fourth byte of an expression  
- LWRD(expression)........ returns bits 0-15 of an expression  
- HWRD(expression).......  returns bits 16-31 of an expression  
+ LWRD(expression)...... returns bits 0-15 of an expression  
+ HWRD(expression).....  returns bits 16-31 of an expression  
  PAGE(expression)........ returns bits 16-21 of an expression  
 
- EXP2(expression).........returns 2 to the power of expression  
+ EXP2(expression)..........returns 2 to the power of expression  
  LOG2(expression).........returns the integer part of log2(expression)  
 
 #### Operands - The following operands can be used:
