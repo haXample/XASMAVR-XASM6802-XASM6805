@@ -38,14 +38,14 @@ XASM6805 [/options] srcfile.asm | srcfile.s
 
 #### Other directives
 [symbol:]...    FCB...... expr,[[expr],["string"],['c'],...]...  ;Form Constant Byte (Allocates bytes)  
-[symbol:]...    FDB...... expr,[[expr],...].......................  ;Form Double Byte Constant (Allocates Words)  
-[symbol:]...    FDW.....  expr,[[expr],...].......................  ;Form Double Word Constant (Allocates Dwords)  
-[symbol:]...    RMB.....  expr,[[expr],...].......................  ;Reserve Memory Block (Defines storage space)  
+[symbol:]...    FDB...... expr,[[expr],...]..............................  ;Form Double Byte Constant (Allocates Words)  
+[symbol:]...    FDW.....  expr,[[expr],...]..............................  ;Form Double Word Constant (Allocates Dwords)  
+[symbol:]...    RMB.....  expr,[[expr],...]..............................  ;Reserve Memory Block (Defines storage space)  
 
-................. ORG...    expr... ;Sets the location counter to expr.  
-constant....      EQU...    expr... ;Assigns expr to constant.  
-symbol......      SET....   expr... ;Assign a redefinable symbol equal to an expression  
-................. END.............. ;Marks the end of a program.
+...................... ORG...    expr... ;Sets the location counter to expr.  
+constant....      EQU...    expr... ;Assigns expr constant (silently truncated to 16bit).  
+symbol.......      SET....   expr.... ;Assign a redefinable symbol equal to an 16bit expression (truncated to 16bit)  
+...................... END................ ;Marks the end of a program.
 
 Directives must be given at start of the source line.
 Symbols (labels) end with colon ':'.  
@@ -174,11 +174,11 @@ Example
  BYTE2(expression)......  is the same function as HIGH  
  BYTE3(expression)......  returns the third byte of an expression  
  BYTE4(expression)......  returns the fourth byte of an expression  
- LWRD(expression).......  returns bits 0-15 of an expression  
- HWRD(expression).......  returns bits 16-31 of an expression  
+ LWRD(expression)......  returns bits 0-15 of an expression  
+ HWRD(expression).....  returns bits 16-31 of an expression  
  PAGE(expression)........ returns bits 16-21 of an expression  
 
- EXP2(expression).........returns 2 to the power of expression  
+ EXP2(expression)..........returns 2 to the power of expression  
  LOG2(expression).........returns the integer part of log2(expression)  
 
  DEFINED(symbol). Returns true if symbol is previously defined using .EQU /.SET /.DEF directives.  
