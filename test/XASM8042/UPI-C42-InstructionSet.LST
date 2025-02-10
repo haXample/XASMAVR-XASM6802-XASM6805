@@ -1,0 +1,715 @@
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   1
+Test: UPI-C42 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                            1   ;---------------------------------------,
+                            2   .TITLE Test: UPI-C42 Instruction set
+                            3   .PAGELENGTH(84)		           	;
+                            4   .PAGEWIDTH(130)		           	;
+                            5   .SYMBOLS			        ;
+                            6   ;---------------------------------------'
+                            7   
+                            8   ;------------------------------------------------------------------------------
+                            9   ;
+                           10   ;		 UPI-C42 2K User ROM/OTP  (000h .. 7FFh)
+                           11   ;
+                           12   
+                           13   ; DATA MEMORY
+                           14   ;
+ = 1000                    15   ROMSIZE		EQU	4096	; Size of on-chip ROM (bytes)
+ = 0100                    16   PAGESIZE	EQU	100h	; Size of data page in ROM (bytes)
+                           17   
+ = 0080                    18   RAMSIZE		EQU	128	; Size of on-chip RAM (bytes)
+ = 0008                    19   STACK		EQU	08h	; System stack starts at RAM address 08h
+ = 0010                    20   STACKSIZE	EQU	8*2	; Stack size = 8 words (16 bit) entries
+                           21   
+ = 04E2                    22   MCYCLE		EQU	1250	;((1/12MHz)/3)*5 = 1.250us per machine cycle 
+ = 0028                    23   TCTIME		EQU	40	;(T/C increments every 32 machine cycles).
+                           24   				;;  e.g.   32 * 1.875us = 60us (8MHz)
+                           25   
+ 0000                      26   		ORG	0	; RAM Segment starts at address 0
+ 0000                      27   RBANK0:		DS	8	; * Register Bank 0 *
+                           28   ;		- - - - - - - - - - - - - - - - - - - - - - - -
+ 0008                      29   		ORG	STACK		; STACK starts at 08h
+ 0008                      30   	   	DS	STACKSIZE	; * Stack (STACKSIZE) *
+                           31   ;		- - - - - - - - - - - - - - - - - - - - - - - -
+ 0018                      32   RBANK1:		DS	8	; * Register Bank 1 *
+                           33   ;
+                           34   ; Start of Working Storage
+                           35   ;
+ 0020                      36   		ORG	20h		;IBM COMPATIBLE LOCATION
+ 0020                      37   	 	DS	1		;we use a register as cmd byte instead
+                           38   					;-----------------------
+ 002B                      39   		ORG	2Bh		;IBM COMPATIBLE LOCATION
+ 002B                      40   rwoffs:		DS	1		;offset for commands 00..1F, 40..5F
+                           41   
+ 0033                      42   		ORG	33h		;IBM COMPATIBLE LOCATION
+ 0033                      43   cmdA6_ack:	DS	1		;non-zero values are sent to system
+                           44   					; to acknowledge the "0A6h" cmd
+                           45   
+ 0034                      46   		ORG	34h		;IBM COMPATIBLE LOCATION
+ 0034                      47   pwmatch_ack:	DS	1		;non-zero values are sent to system
+                           48   					; to acknowledge a password match
+                           49   
+ 0035                      50   		ORG	35h		;reserved
+                           51   ;					;-----------------------
+ 0036                      52   		ORG	36h		;IBM COMPATIBLE LOCATION
+ 0036                      53   pwskip:		DS	2		
+                           54   
+ 0038                      55   		ORG	38h		;reserved
+                           56   
+ 0050                      57   		ORG	50h		;UPI PS/2 (EISA) PASSWORD MODE AREA
+ 0050                      58   		DS	5		;51h..54h  unused
+                           59   		
+                           60   					;PASSWORD SECURITY FEATURE AREA
+ 0055                      61   sysPWinst:	DS	1		;55h: 
+ 0056                      62   sysPW:		DS	2		;56/57h: 
+ 0058                      63   		DS	2		;58/59h: 
+ 005A                      64   verPW:		DS	2		;5A/5Bh: 
+                           65   
+ 005C                      66   actPWfld:				;----------------------------
+ 005C                      67   PWactive:	DS	1		;5Ch:
+ 005D                      68   PWinst:		DS	1		;5Dh:
+ 005E                      69   actPW:		DS	2		;5E/5Fh:
+ = 0004                    70   L_ACTPWFLD	EQU	$-actPWfld	;length of field
+                           71   
+ = 0020                    72   RAMAVAIL	EQU	RAMSIZE-$	;unused RAM available	
+                           73   
+                           74   ;------------------------------------------------------------------------------
+                           75   ; ROMPAGE 0
+                           76   ;	
+ 0000                      77   	ORG	0		; RomPage 0
+                           78   
+ 0000                      79   HWreset:
+ 0000  04 1F               80   	JMP	UPI_C42_instructions
+                           81   
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   2
+Test: UPI-C42 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                           82   ; Info String
+ 0002  49 6E 74 65 6C      83   info	DB	"Intel UPI-C42 Instruction Set"
+ 0007  20 55 50 49 2D  
+ 000C  43 34 32 20 49  
+ 0011  6E 73 74 72 75  
+ 0016  63 74 69 6F 6E  
+ 001B  20 53 65 74     
+ = 001D                    84   INFO_LEN EQU $ - info
+                           85   		 
+ 001F                      86   UPI_C42_instructions:
+                           87   ; ACCUMULATOR
+ 001F  68                  88   	ADD 	A, R0 		; Add register0 to A 
+ 0020  69                  89   	ADD 	A, R1 		; Add register1 to A 
+ 0021  6A                  90   	ADD 	A, R2 		; Add register2 to A 
+ 0022  6B                  91   	ADD 	A, R3 		; Add register3 to A 
+ 0023  6C                  92   	ADD 	A, R4 		; Add register4 to A 
+ 0024  6D                  93   	ADD 	A, R5 		; Add register5 to A 
+ 0025  6E                  94   	ADD 	A, R6 		; Add register6 to A 
+ 0026  6F                  95   	ADD 	A, R7 		; Add register7 to A 
+ 0027  60                  96   	ADD 	A, @R0 		; Add data memory to A 
+ 0028  61                  97   	ADD 	A, @R1 		; Add data memory to A 
+ 0029  03 1D               98   	ADD 	A, #INFO_LEN	; data Add immediate to A 
+ 002B  78                  99   	ADDC 	A, R0		; Add register0 to A with carry 
+ 002C  79                 100   	ADDC 	A, R1		; Add register1 to A with carry 
+ 002D  7A                 101   	ADDC 	A, R2		; Add register2 to A with carry 
+ 002E  7B                 102   	ADDC 	A, R3		; Add register3 to A with carry 
+ 002F  7C                 103   	ADDC 	A, R4		; Add register4 to A with carry 
+ 0030  7D                 104   	ADDC 	A, R5		; Add register5 to A with carry 
+ 0031  7E                 105   	ADDC 	A, R6		; Add register6 to A with carry 
+ 0032  7F                 106   	ADDC 	A, R7 		; Add register7 to A with carry 
+ 0033  70                 107   	ADDC 	A, @R0 		; Add data memory to A with carry 
+ 0034  71                 108   	ADDC 	A, @R1 		; Add data memory to A with carry 
+ 0035  13 12              109   	ADDC 	A, #12h		; Add immediate to A data with carry 
+ 0037  58                 110   	ANL 	A, R0 		; And register0 to A 
+ 0038  59                 111   	ANL 	A, R1 		; And register1 to A 
+ 0039  5A                 112   	ANL 	A, R2 		; And register2 to A 
+ 003A  5B                 113   	ANL 	A, R3 		; And register3 to A 
+ 003B  5C                 114   	ANL 	A, R4 		; And register4 to A 
+ 003C  5D                 115   	ANL 	A, R5 		; And register5 to A 
+ 003D  5E                 116   	ANL 	A, R6 		; And register6 to A 
+ 003E  5F                 117   	ANL 	A, R7 		; And register7 to A 
+ 003F  50                 118   	ANL 	A, @R0 		; And data memory to A 
+ 0040  51                 119   	ANL 	A, @R1 		; And data memory to A 
+ 0041  53 12              120   	ANL 	A, #12h		; data And immediate to A 
+ 0043  48                 121   	ORL 	A, R0 		; Or register0 to A 
+ 0044  49                 122   	ORL 	A, R1 		; Or register1 to A 
+ 0045  4A                 123   	ORL 	A, R2 		; Or register2 to A 
+ 0046  4B                 124   	ORL 	A, R3 		; Or register3 to A 
+ 0047  4C                 125   	ORL 	A, R4 		; Or register4 to A 
+ 0048  4D                 126   	ORL 	A, R5 		; Or register5 to A 
+ 0049  4E                 127   	ORL 	A, R6 		; Or register6 to A 
+ 004A  4F                 128   	ORL 	A, R7 		; Or register7 to A 
+ 004B  40                 129   	ORL 	A, @R0 		; Or data memory to A 
+ 004C  41                 130   	ORL 	A, @R1 		; Or data memory to A 
+ 004D  43 12              131   	ORL 	A, #12h		; data Or immediate to A 
+ 004F  D8                 132   	XRL 	A, R0 		; Exclusive Or register0 to A 
+ 0050  D9                 133   	XRL 	A, R1 		; Exclusive Or register1 to A 
+ 0051  DA                 134   	XRL 	A, R2 		; Exclusive Or register2 to A 
+ 0052  DB                 135   	XRL 	A, R3 		; Exclusive Or register3 to A 
+ 0053  DC                 136   	XRL 	A, R4 		; Exclusive Or register4 to A 
+ 0054  DD                 137   	XRL 	A, R5 		; Exclusive Or register5 to A 
+ 0055  DE                 138   	XRL 	A, R6 		; Exclusive Or register6 to A 
+ 0056  DF                 139   	XRL 	A, R7 		; Exclusive Or register7 to A 
+ 0057  D0                 140   	XRL 	A, @R0 		; Exclusive Or data memory to A 
+ 0058  D1                 141   	XRL 	A, @R1 		; Exclusive Or data memory to A 
+ 0059  D3 12              142   	XRL 	A, #12h		; data Exclusive Or immediate to A 
+ 005B  07                 143   	DEC 	A	 	; Decrement A 
+ 005C  17                 144   	INC 	A 		; Increment A 
+ 005D  27                 145   	CLR 	A	 	; Clear A 
+ 005E  37                 146   	CPL 	A	 	; Complement A 
+ 005F  47                 147   	SWAP 	A 		; Swap nibbles of A 
+ 0060  57                 148   	DA  	A	 	; Decimal Adjust A 
+ 0061  67                 149   	RRC 	A	 	; Rotate A right through carry 
+ 0062  77                 150   	RR 	A	 	; Rotate A right 
+ 0063  E7                 151   	RL 	A	 	; Rotate A left 
+ 0064  F7                 152   	RLC 	A	 	; Rotate A left	through carry 
+                          153   
+                          154   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   3
+Test: UPI-C42 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          155   ; INPUT/OUTPUT
+ 0065  09                 156   	IN 	A, P1	 	; Input port1, to A 
+ 0066  0A                 157   	IN 	A, P2	 	; Input port2, to A 
+ 0067  39                 158   	OUTL 	P1, A	 	; Output A to port1 
+ 0068  3A                 159   	OUTL 	P2, A	 	; Output A to port2 
+ 0069  99 12              160   	ANL 	P1, #12h 	;data And immediate to port1 
+ 006B  9A 12              161   	ANL 	P2, #12h 	;data And immediate to port2 
+ 006D  89 12              162   	ORL 	P1, #12h	;data Or immediate to port1 
+ 006F  8A 12              163   	ORL 	P2, #12h	;data Or immediate to port2 
+ 0071  22                 164   	IN 	A, DBB	 	; Input DDB to A, clear IBF 
+ 0072  02                 165   	OUT 	DBB, A	 	; Output A to DBB, Set OBF 
+ 0073  90                 166   	MOV 	STS,A	 	; A4-A7 to bits 4-7 of status 
+                          167   
+ 0074  0C                 168   	MOVD 	A, P4	 	;= 0Ch Input Expander port4, to A
+ 0075  0D                 169   	MOVD 	A, P5	 	;= 0Dh Input Expander port5, to A
+ 0076  0E                 170   	MOVD 	A, P6	 	;= 0Eh Input Expander port6, to A
+ 0077  0F                 171   	MOVD 	A, P7	 	;= 0Fh Input Expander port7, to A
+ 0078  3C                 172   	MOVD 	P4, A	 	;= 3Ch Output A to Expander port4
+ 0079  3D                 173   	MOVD 	P5, A	 	;= 3Dh Output A to Expander port5
+ 007A  3E                 174   	MOVD 	P6, A	 	;= 3Eh Output A to Expander port6
+ 007B  3F                 175   	MOVD 	P7, A	 	;= 3Fh Output A to Expander port7
+ 007C  9C                 176   	ANLD 	P4, A	 	;= 9Ch And A to Expander port4 
+ 007D  9D                 177   	ANLD 	P5, A	 	;= 9Dh And A to Expander port5 
+ 007E  9E                 178   	ANLD 	P6, A	 	;= 9Eh And A to Expander port6 
+ 007F  9F                 179   	ANLD 	P7, A	 	;= 9Fh And A to Expander port7 
+ 0080  8C                 180   	ORLD 	P4, A	 	;= 8Ch Or A to Expander port4 
+ 0081  8D                 181   	ORLD 	P5, A	 	;= 8Dh Or A to Expander port5 
+ 0082  8E                 182   	ORLD 	P6, A	 	;= 8Eh Or A to Expander port6 
+ 0083  8F                 183   	ORLD 	P7, A	 	;= 8Fh Or A to Expander port7 
+                          184   
+                          185   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   4
+Test: UPI-C42 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          186   ; DATA MOVES
+ 0084  F8                 187   	MOV 	A, R0	 	; Move register0 to A 
+ 0085  F9                 188   	MOV 	A, R1	 	; Move register1 to A 
+ 0086  FA                 189   	MOV 	A, R2	 	; Move register2 to A 
+ 0087  FB                 190   	MOV 	A, R3	 	; Move register3 to A 
+ 0088  FC                 191   	MOV 	A, R4	 	; Move register4 to A 
+ 0089  FD                 192   	MOV 	A, R5	 	; Move register5 to A 
+ 008A  FE                 193   	MOV 	A, R6	 	; Move register6 to A 
+ 008B  FF                 194   	MOV 	A, R7	 	; Move register7 to A 
+ 008C  F0                 195   	MOV 	A, @R0	 	; Move data memory to A 
+ 008D  F1                 196   	MOV 	A, @R1	 	; Move data memory to A 
+ 008E  23 12              197   	MOV 	A, #12h	 	;data Move immediate to A 
+ 0090  A8                 198   	MOV 	R0, A	 	; Move A to register0 
+ 0091  A9                 199   	MOV 	R1, A	 	; Move A to register1 
+ 0092  AA                 200   	MOV 	R2, A	 	; Move A to register2 
+ 0093  AB                 201   	MOV 	R3, A	 	; Move A to register3 
+ 0094  AC                 202   	MOV 	R4, A	 	; Move A to register4 
+ 0095  AD                 203   	MOV 	R5, A	 	; Move A to register5 
+ 0096  AE                 204   	MOV 	R6, A	 	; Move A to register6 
+ 0097  AF                 205   	MOV 	R7, A	 	; Move A to register7 
+ 0098  A0                 206   	MOV 	@R0, A	 	; Move A to data memory 
+ 0099  A1                 207   	MOV 	@R1, A	 	; Move A to data memory 
+ 009A  B8 41              208   	MOV 	R0, #5+30*2	;data Move immediate to register0 
+ 009C  B9 41              209   	MOV 	R1, #(25/5)+30*2;data Move immediate to register1 
+ 009E  BA 41              210   	MOV 	R2, #5+(-30*-2)	;data Move immediate to register2 
+ 00A0  BB 12              211   	MOV 	R3, #12h	;data Move immediate to register3 
+ 00A2  BC 12              212   	MOV 	R4, #12h	;data Move immediate to register4 
+ 00A4  BD 12              213   	MOV 	R5, #12h	;data Move immediate to register5 
+ 00A6  BE 12              214   	MOV 	R6, #12h	;data Move immediate to register6 
+ 00A8  BF 03              215   	MOV 	R7, #15/(3+18/9);data Move immediate to register7 
+ 00AA  B0 07              216   	MOV 	@R0, #15/3+18/9	; Move immediate to Ãdata data memory 
+ 00AC  B1 0C              217   	MOV 	@R1, #12	; Move immediate to Ãdata data memory 
+ 00AE  C7                 218   	MOV 	A, PSW	 	; Move PSW to A 
+ 00AF  D7                 219   	MOV 	PSW, A	 	; Move A to PSW 
+ 00B0  28                 220   	XCH 	A, R0 		; Exchange A and registers0 
+ 00B1  29                 221   	XCH 	A, R1 		; Exchange A and registers1 
+ 00B2  2A                 222   	XCH 	A, R2 		; Exchange A and registers2 
+ 00B3  2B                 223   	XCH 	A, R3 		; Exchange A and registers3 
+ 00B4  2C                 224   	XCH 	A, R4 		; Exchange A and registers4 
+ 00B5  2D                 225   	XCH 	A, R5 		; Exchange A and registers5 
+ 00B6  2E                 226   	XCH 	A, R6 		; Exchange A and registers6 
+ 00B7  2F                 227   	XCH 	A, R7 		; Exchange A and registers7 
+ 00B8  20                 228   	XCH 	A, @R0	 	; Exchange A and data memory 
+ 00B9  21                 229   	XCH 	A, @R1	 	; Exchange A and data memory 
+ 00BA  30                 230   	XCHD 	A, @R0	 	; Exchange digit (bit[3:0]) of A and register0 
+ 00BB  31                 231   	XCHD 	A, @R1	 	; Exchange digit (bit[3:0]) of A and register1 
+                          232   	
+ 00BC  A3                 233   	MOVP 	A, @A		; Move to A from current page 
+ 00BD  E3                 234   	MOVP3 	A, @A	 	; Move to A from page 3 
+                          235   	
+                          236   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   5
+Test: UPI-C42 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          237   ; FLAGS
+ 00BE  97                 238   	CLR 	C	 	; Clear Carry 
+ 00BF  A7                 239   	CPL 	C	 	; Complement Carry 
+ 00C0  85                 240   	CLR 	F0	 	; Clear Flag 0 
+ 00C1  95                 241   	CPL 	F0	 	; Complement Flag 0 
+ 00C2  A5                 242   	CLR 	F1		; Clear F1 Flag 
+ 00C3  B5                 243   	CPL 	F1	 	; Complement F1 Flag 
+                          244   
+                          245   ; TIMER/COUNTER
+ 00C4  42                 246   	MOV 	A, T	 	; Read Timer/Counter 
+ 00C5  62                 247   	MOV 	T, A	 	; Load Timer/Counter 
+ 00C6  55                 248   	STRT 	T	 	; Start Timer 
+ 00C7  45                 249   	STRT 	CNT	 	; Start Counter 
+ 00C8  65                 250   	STOP 	TCNT	 	; Stop Timer/Counter 
+ 00C9  25                 251   	EN 	TCNTI	 	; Enable Timer/Counter 
+ 00CA  35                 252   	DIS 	TCNTI	 	; Disable Timer/Counter 
+                          253   
+                          254   ; Interrupt CONTROL
+                          255   ;	-----------		;UPI-C42 (80C42) only, enable A20 mechanism 
+ 00CB  33                 256   	EN	A20		;NOTE: if the new Intel UPI-C42 is used and
+                          257   ;	-----------		; the instruction "EN A20" has been executed
+                          258   				; then all "A20-gate" performance problems
+                          259   				; are resolved for the time being
+                          260   				; (see Intel UPI-C42 O-Nr: 290414-003 Dec1995 page 6,7)
+                          261   				
+ 00CC  F5                 262   	EN 	FLAGS	 	; Enable Master Interrupts 
+ 00CD  E5                 263   	EN 	DMA	 	; Enable DMA Handshake Lines 
+ 00CE  05                 264   	EN 	I	 	; Enable IBF interrupt 
+ 00CF  25                 265   	DIS 	I	 	; Disable IBF interrupt 
+ 00D0  C5                 266   	SEL	RB0	 	; Select register bank 0 
+ 00D1  D5                 267   	SEL 	RB1	 	; Select register bank 1
+ 00D2  63                 268   	SEL	PMB0	 	;= 63h Select program memory bank 0 (addr > 2K)
+ 00D3  73                 269   	SEL 	PMB1	 	;= 73h Select program memory bank 1 (addr > 2K)
+ 00D4  00                 270   	NOP	 		; No Operation 
+                          271   
+                          272   ; REGISTERS
+ 00D5  18                 273   	INC 	R0 		; Increment register0 
+ 00D6  19                 274   	INC 	R1 		; Increment register1 
+ 00D7  1A                 275   	INC 	R2 		; Increment register2 
+ 00D8  1B                 276   	INC 	R3 		; Increment register3 
+ 00D9  1C                 277   	INC 	R4 		; Increment register4 
+ 00DA  1D                 278   	INC 	R5 		; Increment register5 
+ 00DB  1E                 279   	INC 	R6 		; Increment register6 
+ 00DC  1F                 280   	INC 	R7 		; Increment register7 
+ 00DD  10                 281   	INC 	@R0	 	; Increment data memory 
+ 00DE  11                 282   	INC 	@R1	 	; Increment data memory 
+ 00DF  C8                 283   	DEC 	R0	 	; Decrement register0 
+ 00E0  C9                 284   	DEC 	R1	 	; Decrement register1 
+ 00E1  CA                 285   	DEC 	R2	 	; Decrement register2 
+ 00E2  CB                 286   	DEC 	R3	 	; Decrement register3 
+ 00E3  CC                 287   	DEC 	R4	 	; Decrement register4 
+ 00E4  CD                 288   	DEC 	R5	 	; Decrement register5 
+ 00E5  CE                 289   	DEC 	R6	 	; Decrement register6 
+ 00E6  CF                 290   	DEC 	R7	 	; Decrement register7 
+                          291   ;
+ 00E7  F8                 292   amovp0:		MOV	A,R0		
+ 00E8  A3                 293   		MOVP	A,@A	;routine is called during SELFTEST
+ 00E9  83                 294   		RET
+                          295   
+                          296   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   6
+Test: UPI-C42 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          297   ; Example - ROMPAGE 1	
+ 0100                     298   	ORG	100h		;RomPage 1
+                          299   
+                          300   ;------------------------------------------------------------------------------
+                          301   ;
+                          302   ;			KYBIN: Input from keyboard.
+                          303   ;
+                          304   ; "KYBIN" - entered via call from 'SNDKYB' and ISA/EISA main polling loop
+                          305   ;
+                          306   ; PROCESS: the keyboard data is read either in PS/2 or AT mode
+                          307   ;
+                          308   ; INPUT: PS/2 (EISA) KybDat P1.0 = low (start bit) 
+                          309   ;	 ISA (AT) KybDat T1 = low (start bit)
+                          310   ;	 EISA/ISA KybClk T0 = low (start bit clk)
+                          311   ; OUTPUT: (A) = key scancode, STATUS
+                          312   ;	  CY=0 if no errors, CY=1 if receive errors were detected 
+                          313   ; MODIFICATIONS: A,R1,ONECNT,BITCNT,STATUS
+                          314   ; STACK USAGE: 1 byte 
+                          315   ;
+                          316   ; DESCRIPTION:	This routine needs 17~ MCYCLEs (8MHz=31.8us, 12MHz=21.2us) to
+                          317   ;		verify that the start bit clk (T0) is low.
+                          318   ;		Refer to IBM keyboard and auxiliary timing specification:
+                          319   ;		 Time from DATA transition to falling edge of CLK := 5..25us
+                          320   ;		 Duration of CLK low or CLK high := 30..50us		
+                          321   ;		 Time to inhibit keyboard/mouse after clock 11 := <50us 
+                          322   ;
+                          323   ;		 MAIN POLLING LOOP & SNDMOU, trigger T0&P1.0 = low (start bit):
+                          324   ;		  When called the minimum total MCYCLEs needed to get to the
+                          325   ;		  KYBCLK routine are: 19~+9~=28~ (8MHz=52.5us, 12MHz=35.0us).
+                          326   ;      
+                          327   ;		  1) Keyboards may pull start-bit-clock low after > 25us!
+                          328   ;		     (This allows keyboards to be out of spec. at the
+                          329   ;		      start-bit phase).
+                          330   ;
+                          331   ;		       ___________     ___      
+                          332   ;		KYBCLK            \___/   \___/  ... 
+                          333   ;		                  |       |      
+                          334   ;		       ____   start bit  _|_ 1st data bit ...
+                          335   ;		KYBDAT     \______|_____/ |      ...
+                          336   ;		           |      | min.  |
+                          337   ;	 [us(12MHz)] ->    | un-  | 35.0  |     
+                          338   ;		           | cri- | 43.7  |     (1 extra NOVELL polling (7~))
+                          339   ;	 [us(8MHz)] ->     | ti-  | 52.5  |
+                          340   ;		           | cal  | 65.6  |     (1 extra NOVELL polling (7~))
+                          341   ;      
+                          342   ;		  2) The total period of the start-bit-clock (low+high) must be
+                          343   ;		     at least 65.6us. Typically keyboards have clk periods
+                          344   ;		     greater than (35+35 = 70)us.
+                          345   ;
+                          346   				;BANK 0
+ = 0002                   347   CONVERT		EQU	R2	; UPI AT-mode flag
+ = 0003                   348   BITCNT		EQU	R3	; bit counter for transmit/receive
+ = 0004                   349   ONECNT		EQU	R4	; "1" counter for parity checking
+                          350   
+ 0100  0D                 351   kybinjmp:	DB	PS2kbin AND 0FFh ;jump table
+ 0101  0D                 352   		DB	ATkbin  AND 0FFh  
+                          353   
+ 0102                     354   KybIn:					;GENERAL INITIALIZATION
+ 0102  23 CE              355   	MOV	A,#(-(2000/TCTIME))	;2ms
+ 0104  62                 356   	MOV	T,A			;set timer
+ 0105  16 07              357   	JTF	$+2			;reset timer overflow flag
+ 0107  BC 00              358   	MOV	ONECNT,#0		;reset "1" counter
+ 0109  BB 08              359   	MOV	BITCNT,#8		;receive 8 bits
+                          360   
+ 010B  FA                 361   	MOV	A,CONVERT	;jump to either PS/2 or AT design
+ 010C  B3                 362   	JMPP	@A		;go to routine via table at start of page seg
+                          363   
+ 010D                     364   PS2kbin: ; PS/2 (EISA): Input from keyboard. RECEIVE 8 BITS: PS/2 interface
+                          365   
+ 010D                     366   ATkbin:	 ; AT (ISA): Input from keyboard. RECEIVE 8 BITS: AT (ISA) interface
+                          367   
+ 010D  83                 368   	RET			; ... Code not shown
+                          369   
+                          370   
+                          371   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   7
+Test: UPI-C42 Instruction set
+
+ LOC   OBJ               LINE   SOURCE
+
+                          372   ;------------------------------------------------------------------------------
+                          373   ;
+ 010E  34 10              374   	CALL 	addr	 	; Jump to checksum subroutine (..code not shown)
+ 0110  83                 375   addr:	RET	 		; Return 
+ 0111  93                 376   	RETR	 		; Return and restore status 
+                          377   
+                          378   ; BRANCH
+ 0112  24 10              379   	JMP 	addr	 	; Jump unconditional 
+ 0114  B3                 380   	JMPP 	@A	 	; Jump indirect 
+ 0115  E8 10              381   	DJNZ 	R0, addr	; Decrement register0 addr and jump on non-zero 
+ 0117  E9 10              382   	DJNZ 	R1, addr	; Decrement register1 addr and jump on non-zero 
+ 0119  EA 10              383   	DJNZ 	R2, addr	; Decrement register2 addr and jump on non-zero 
+ 011B  EB 10              384   	DJNZ 	R3, addr	; Decrement register3 addr and jump on non-zero 
+ 011D  EC 10              385   	DJNZ 	R4, addr	; Decrement register4 addr and jump on non-zero 
+ 011F  ED 10              386   	DJNZ 	R5, addr	; Decrement register5 addr and jump on non-zero 
+ 0121  EE 10              387   	DJNZ 	R6, addr	; Decrement register6 addr and jump on non-zero 
+ 0123  EF 10              388   	DJNZ 	R7, addr	; Decrement register7 addr and jump on non-zero 
+ 0125  F6 10              389   	JC 	addr	 	; Jump on Carry e1 
+ 0127  E6 10              390   	JNC 	addr	 	; Jump on Carry e0 
+ 0129  C6 10              391   	JZ 	addr	 	; Jump on A zero 
+ 012B  96 10              392   	JNZ 	addr	 	; Jump on A not zero 
+ 012D  36 10              393   	JT0 	addr	 	; Jump on T0 e1 
+ 012F  26 10              394   	JNT0 	addr	 	; Jump on T0 e0 
+ 0131  56 10              395   	JT1 	addr	 	; Jump on T1 e1 
+ 0133  46 10              396   	JNT1 	addr	 	; Jump on T1 e0 
+ 0135  B6 10              397   	JF0 	addr	 	; Jump on F0 Flag e1 
+ 0137  76 10              398   	JF1 	addr	 	; Jump on F1 Flag e1 
+ 0139  16 10              399   	JTF 	addr	 	; Jump on Timer Flag e1 
+ 013B  D6 10              400   	JNIBF 	addr	 	; Jump on IBF Flag e0 
+ 013D  86 10              401   	JOBF 	addr	 	; Jump on OBF Flag e1 
+ 013F  12 10              402   	JB0 	addr	 	; Jump on Accumulator Bit0 
+ 0141  32 10              403   	JB1 	addr	 	; Jump on Accumulator Bit1 
+ 0143  52 10              404   	JB2 	addr	 	; Jump on Accumulator Bit2 
+ 0145  72 10              405   	JB3 	addr	 	; Jump on Accumulator Bit3 
+ 0147  92 10              406   	JB4 	addr	 	; Jump on Accumulator Bit4 
+ 0149  B2 10              407   	JB5 	addr	 	; Jump on Accumulator Bit5 
+ 014B  D2 10              408   	JB6 	addr	 	; Jump on Accumulator Bit6 
+ 014D  F2 10              409   	JB7 	addr	 	; Jump on Accumulator Bit7 
+                          410   
+ 014F  F8                 411   amovp1:		MOV	A,R0		
+ 0150  A3                 412   		MOVP	A,@A	;routine is called during SELFTEST
+ 0151  83                 413   		RET
+                          414   
+                          415   ;  Example - ROMPAGE 2..7	
+ 0200                     416   	ORG	200h		;RomPage 2
+ 0200  F8                 417   amovp2:		MOV	A,R0		
+ 0201  A3                 418   		MOVP	A,@A	;routine is called during SELFTEST
+ 0202  83                 419   		RET
+ 0300                     420   	ORG	300h		;RomPage 3
+ 0400                     421   	ORG	400h		;RomPage 4
+ 0400  F8                 422   amovp4:		MOV	A,R0		
+ 0401  A3                 423   		MOVP	A,@A	;routine is called during SELFTEST
+ 0402  83                 424   		RET
+ 0500                     425   	ORG	500h		;RomPage 5
+ 0500  F8                 426   amovp5:		MOV	A,R0		
+ 0501  A3                 427   		MOVP	A,@A	;routine is called during SELFTEST
+ 0502  83                 428   		RET
+ 0600                     429   	ORG	600h		;RomPage 6
+ 0600  F8                 430   amovp6:		MOV	A,R0		
+ 0601  A3                 431   		MOVP	A,@A	;routine is called during SELFTEST
+ 0602  83                 432   		RET
+ 0700                     433   	ORG	700h		;RomPage 7
+ 0700  F8                 434   amovp7:		MOV	A,R0		
+ 0701  A3                 435   		MOVP	A,@A	;routine is called during SELFTEST
+ 0702  83                 436   		RET
+                          437   
+                          438   .SUBTTL Code Examples continued ...
+                          439   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   8
+Test: UPI-C42 Instruction set
+Code Examples continued ...
+
+ LOC   OBJ               LINE   SOURCE
+
+                          440   ;----------------------------------------------------------------------------
+                          441   ;
+ 0703  EF EF              442           DB LOW  (89ABCDEFh),  89ABCDEFh AND 0EFh              ; Bits [ 7: 0]
+ 0705  CD CD              443           DB HIGH (89ABCDEFh), (89ABCDEFh SHR  8) AND 0FFh      ; Bits [15: 8]
+ 0707  CD CD              444           DB BYTE2(89ABCDEFh), (89ABCDEFh SHR  8) AND 0FFh      ; Bits [15: 8]
+ 0709  AB AB              445           DB BYTE3(89ABCDEFh), (89ABCDEFh SHR 16) AND 0FFh      ; Bits [23:16]
+ 070B  89 89              446           DB BYTE4(89ABCDEFh), (89ABCDEFh SHR 24) AND 0ffh      ; Bits [31:24]
+ 070D  CDEF               447           DW LWRD(89ABCDEFh),   89ABCDEFh AND 0FFFFh            ; Bits [15: 0]	    
+ 070F  CDEF            
+ 0711  89AB               448           DW HWRD(89ABCDEFh),   89ABCDEFh SHR 16	              ; Bits [31:16]	         
+ 0713  89AB            
+ 0715  34 34              449   	DB PAGE(12345678h),  (12345678h AND 003F0000h) SHR 16 ; Bits [21:16]             
+                          450   
+ 0717  14 01 0D 31 32     451   _db01c	DB  	_DB01C_LENGTH, 1,13,'12"3":; ,"', '", "', 'A', '"', ''', '', "";, 25, 4 \
+ 071C  22 33 22 3A 3B  
+ 0721  20 2C 22 00 00  
+ 0726  41 22 27 00 00  
+ = 0014                   452   _DB01C_LENGTH EQU $ - _db01c
+                          453   
+ = 0011                   454   _11 SET 11h
+ = 0012                   455   _12 SET 12h
+ = 0013                   456   _13 SET 13h
+ 072B                     457   _db3:   DB	_11,_12, _13, 'Z'+1, \
+                                		 10101b, 1b, 101b,   \
+                                                 "1234567890abcd ",  \
+                                                 'A',_db3 AND 0FFh,  \
+                                                 "1234567890abcde",  \
+                                                 0FFh,0FFh
+ 072B  11 12 13 5B 15   
+ 0730  01 05 31 32 33  
+ 0735  34 35 36 37 38  
+ 073A  39 30 61 62 63  
+ 073F  64 20 41 2B 31  
+ 0744  32 33 34 35 36  
+ 0749  37 38 39 30 61  
+ 074E  62 63 64 65 FF  
+ 0753  FF              
+                          458   
+ 0754  32 36 2F 30 31     459   _db09	DB	__DATE__, __TIME__, __CENTURY__
+ 0759  2F 32 30 32 35  
+ 075E  31 34 3A 32 39  
+ 0763  3A 31 31 15     
+                          460   
+ 0767                     461   db10	DB	'26/01/2025', '14:29:11', '21', \
+                                	0
+ 0767  32 36 2F 30 31   
+ 076C  2F 32 30 32 35  
+ 0771  31 34 3A 32 39  
+ 0776  3A 31 31 32 31  
+ 077B  00              
+ 077C  0001               462   _DW1:	DW 1
+                          463   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE   9
+Test: UPI-C42 Instruction set
+Code Examples continued ...
+
+ LOC   OBJ               LINE   SOURCE
+
+                          464   ;----------------------------------------------------------------------------
+                          465   ;
+ 077E  1C                 466   	DB STRLEN("XASMAVR Macro Assembler V2.1") 
+                          467   
+ 077F  01 01              468   	DB EXP2(0),  1		  
+ 0781  80 80              469   	DB EXP2(7),  128	  
+ 0783  0100               470   	DW EXP2(8),  256	  
+ 0785  0100            
+ 0787  8000               471   	DW EXP2(15), 32768                                                             
+ 0789  8000            
+                          472   	
+ 078B  40 40              473           DB LOG2(0),                    	64 ; Illegal, out of range
+ 078D  00 00              474           DB LOG2(1),                      0
+ 078F  07 07              475           DB LOG2(128),                    7
+ 0791  0F 0F              476           DB LOG2(32768),     		15
+ 0793  10 10              477           DB LOG2(65536),     		16
+ 0795  17 17              478           DB LOG2(8388608),     		23
+ 0797  18 18              479           DB LOG2(16777216),     		24
+ 0799  1F 1F              480           DB LOG2(2147483648),     	31
+ 079B  20 20              481           DB LOG2(4294967296),     	32
+ 079D  27 27              482           DB LOG2(549755813888),     	39
+ 079F  2F 2F              483           DB LOG2(140737488355328),      	47
+ 07A1  37 37              484           DB LOG2(36028797018963968),    	55
+ 07A3  3F 3F              485           DB LOG2(9223372036854775808),  	63
+ 07A5  40 40              486           DB LOG2(18446744073709551616),	64
+                          487   
+                          488   ;-----------------------------------------------------------------,
+                          489   ; Warning: Use parenthesis in complex expressions!		  |
+ = A675                   490   _VAR SET 0a600h*256+75a2h SHR 8     ;; =00A60075 NOT EXPECTED ?!  |
+ 07A7  A675               491   	DW _VAR		     	    ;				  |
+ = 0075                   492   _VAR SET (0a600h*256)+(75a2h SHR 8) ;; =00a60075 expected         |
+ 07A9  0075               493   	DW LOW(_VAR)                ;				  |
+ 07AB  A600               494   	DW _VAR SHR 8               ;				  |
+ = A675                   495   _VAR SET (0a600h*256+75a2h) SHR 8   ;; =0000a675 expected         |
+ 07AD  A675               496   	DW _VAR                     ;				  |
+                          497   ;-----------------------------------------------------------------'
+                          498   
+                          499   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE  10
+Test: UPI-C42 Instruction set
+Code Examples continued ...
+
+ LOC   OBJ               LINE   SOURCE
+
+                          500   ;------------------------------------------------------------------------------
+                          501   ;
+                          502   ;			cmdAX
+                          503   ;
+ 07AF                     504   cmdAX:				;A0..AFh: UPI CONTROLLER COMMANDS.
+ 07AF  F9                 505   	MOV	A,R1		;get subfunction
+ 07B0  03 B3              506   	ADD	A,#cmdjmp_AX AND 0FFh
+ 07B2  B3                 507   	JMPP	@A
+                          508   
+ 07B3                     509   cmdjmp_AX:
+ 07B3  BA                 510   	DB	cmdA2 AND 0FFh	;backup/restore sys password
+ 07B4  BC                 511   	DB	cmdA3 AND 0FFh	;load hashed password
+ 07B5  BE                 512   	DB	cmdA5 AND 0FFh	;load password from system
+ 07B6  C0                 513   	DB	cmdA6 AND 0FFh	;enable password
+ 07B7  C2                 514   	DB	cmdA9 AND 0FFh	;test auxiliary device interface
+ 07B8  C4                 515   	DB	cmdAA AND 0FFh	;UPI seftest
+ 07B9  C6                 516   	DB	cmdAB AND 0FFh	;keyboard interface test
+                          517   
+ 07BA  E4 BA              518   cmdA2:	JMP	cmdA2		;backup/restore sys password
+ 07BC  E4 BC              519   cmdA3:	JMP	cmdA3		;load hashed password
+ 07BE  E4 BE              520   cmdA5:	JMP	cmdA5		;load password
+ 07C0  E4 C0              521   cmdA6:	JMP	cmdA6		;enable password
+ 07C2  E4 C2              522   cmdA9:	JMP	cmdA9		;auxiliary interface test
+ 07C4  E4 C4              523   cmdAA:	JMP	cmdAA		;jmp to self test & init
+ 07C6  E4 C6              524   cmdAB:	JMP	cmdAB		;jmp to keyboard interface test
+                          525   
+                          526   ;------------------------------------------------------------------------------
+                          527   ;
+                          528   ; 			TIMER TEST
+                          529   ;
+ 07C8  23 FA              530   	MOV	A,#(-(240/TCTIME))	;240us time out
+ 07CA  62                 531   	MOV	T,A			;set timer for a quick timeout
+ 07CB  16 CD              532   	JTF	$+2			;reset timer overflow flag
+ 07CD  E8 CD              533   stdly:	DJNZ	R0,stdly	;loop 256 times: 8MHz=959us, 12MHz=640us
+ 07CF  16 D5              534   	JTF	chkrom		;timer overflow occurred (240us), go ahead
+ 07D1  E4 D1              535   sterr:	JMP	$		;failed self test, hang forever
+                          536   
+                          537   ;------------------------------------------------------------------------------
+                          538   ;
+                          539   ; 			ROM TEST
+                          540   ;
+ 07D3  B8 00              541   	MOV	R0,#0		;Clear R0
+ 07D5                     542   chkrom:				;ROM CHECKSUM TEST (ptr R0 zero'ed previously)
+ 07D5  14 E7              543   	CALL	amovp0		;ROM Page #0 checksum
+ 07D7  69                 544   	ADD	A,R1		;cumulative sum R1 cleared previously
+ 07D8  A9                 545   	MOV	R1,A		;save cumulative checksum
+ 07D9  34 4F              546   	CALL	amovp1		;ROM page #1
+ 07DB  69                 547   	ADD	A,R1
+ 07DC  A9                 548   	MOV	R1,A
+ 07DD  54 00              549   	CALL	amovp2		;ROM page #2
+ 07DF  69                 550   	ADD	A,R1
+ 07E0  A9                 551   	MOV	R1,A
+ 07E1  F8                 552   	MOV	A,R0
+                          553   
+ 07E2  E3                 554   	MOVP3	A,@A		;ROM page #3
+ 07E3  69                 555   	ADD	A,R1
+ 07E4  A9                 556   	MOV	R1,A
+                          557   
+ 07E5  94 00              558   	CALL	amovp4		;ROM page #4
+ 07E7  69                 559   	ADD	A,R1
+ 07E8  A9                 560   	MOV	R1,A
+ 07E9  B4 00              561   	CALL	amovp5		;ROM page #5
+ 07EB  69                 562   	ADD	A,R1
+ 07EC  A9                 563   	MOV	R1,A
+ 07ED  D4 00              564   	CALL	amovp6		;ROM page #6
+ 07EF  69                 565   	ADD	A,R1
+ 07F0  A9                 566   	MOV	R1,A
+ 07F1  F4 00              567   	CALL	amovp7		;ROM page #7
+ 07F3  69                 568   	ADD	A,R1
+ 07F4  A9                 569   	MOV	R1,A
+                          570   
+ 07F5  E8 D5              571   	DJNZ	R0,chkrom	;each ROM page has 256 bytes
+ 07F7  96 D1              572   	JNZ	sterr  		;error if checksum isn't 0
+ 07F9  04 00              573   	JMP	HWreset		;JMP to mainlp (stack is all tested & cleared!)
+                          574   
+                          575   .EJECT
+UPI-41/C42 Cross-Assembler, Version 2.1                   26/01/2025  PAGE  11
+Test: UPI-C42 Instruction set
+Code Examples continued ...
+
+ LOC   OBJ               LINE   SOURCE
+
+                          576   ;------------------------------------------------------------------------------
+                          577   ;
+                          578   ;			LSHIFT
+                          579   ;
+ 07FB                     580   lshift:				;rol a word value in @R1(lsb) / @R1 (msb)
+ 07FB  F1                 581   	MOV	A,@R1		;get low byte
+ 07FC  97                 582   	CLR	C		;at first shift the stuff logically left
+ 07FD  F7                 583   	RLC	A		;[C] << [msb] << [C] << [lsb] << [0]
+ 07FE  A1                 584   	MOV	@R1,A		;store low byte
+                          585   
+ 07FF  19                 586   	INC	R1		;get hi byte address
+ 0800  F1                 587   	MOV	A,@R1		;get hi byte
+ 0801  F7                 588   	RLC	A		;shift carry from low byte into hi byte
+ 0802  A1                 589   	MOV	@R1,A		;store hi byte
+ 0803  C9                 590   	DEC	R1		;re-adjust pointer to low byte address
+ 0804  E6 08              591   	JNC	lshret		;done if no carry from hi byte
+                          592   				;[lsb] << [C]
+ 0806  F1                 593   	MOV	A,@R1		;get low byte
+ 0807  11                 594   	INC	@R1		;put carry from hi byte into lsb   
+ 0808                     595   lshret:
+ 0808  83                 596   	RET			;now a word has been ROL'ed
+                          597   
+                          598   ;------------------------------------------------------------------------------
+                          599   	END	
+
+USER SYMBOLS
+
+_11 . . . . . . . .  0011 A  _12 . . . . . . . .  0012 A  _13 . . . . . . . .  0013 A  _db01c. . . . . . .  0717 C  
+_DB01C_LENGTH . . .  0014 A  _db09 . . . . . . .  0754 C  _db3. . . . . . . .  072B C  _DW1. . . . . . . .  077C C  
+_VAR. . . . . . . .  A675 A  actPW . . . . . . .  005E C  actPWfld. . . . . .  005C C  addr. . . . . . . .  0110 C  
+amovp0. . . . . . .  00E7 C  amovp1. . . . . . .  014F C  amovp2. . . . . . .  0200 C  amovp4. . . . . . .  0400 C  
+amovp5. . . . . . .  0500 C  amovp6. . . . . . .  0600 C  amovp7. . . . . . .  0700 C  ATkbin. . . . . . .  010D C  
+BITCNT. . . . . . .  0003 A  chkrom. . . . . . .  07D5 C  cmdA2 . . . . . . .  07BA C  cmdA3 . . . . . . .  07BC C  
+cmdA5 . . . . . . .  07BE C  cmdA6 . . . . . . .  07C0 C  cmdA6_ack . . . . .  0033 C  cmdA9 . . . . . . .  07C2 C  
+cmdAA . . . . . . .  07C4 C  cmdAB . . . . . . .  07C6 C  cmdAX . . . . . . .  07AF C  cmdjmp_AX . . . . .  07B3 C  
+CONVERT . . . . . .  0002 A  db10. . . . . . . .  0767 C  HWreset . . . . . .  0000 C  info. . . . . . . .  0002 C  
+INFO_LEN. . . . . .  001D A  KybIn . . . . . . .  0102 C  kybinjmp. . . . . .  0100 C  L_ACTPWFLD. . . . .  0004 A  
+lshift. . . . . . .  07FB C  lshret. . . . . . .  0808 C  MCYCLE. . . . . . .  04E2 A  ONECNT. . . . . . .  0004 A  
+PAGESIZE. . . . . .  0100 A  PS2kbin . . . . . .  010D C  PWactive. . . . . .  005C C  PWinst. . . . . . .  005D C  
+pwmatch_ack . . . .  0034 C  pwskip. . . . . . .  0036 C  RAMAVAIL. . . . . .  0020 A  RAMSIZE . . . . . .  0080 A  
+RBANK0. . . . . . .  0000 C  RBANK1. . . . . . .  0018 C  ROMSIZE . . . . . .  1000 A  rwoffs. . . . . . .  002B C  
+STACK . . . . . . .  0008 A  STACKSIZE . . . . .  0010 A  stdly . . . . . . .  07CD C  sterr . . . . . . .  07D1 C  
+sysPW . . . . . . .  0056 C  sysPWinst . . . . .  0055 C  TCTIME. . . . . . .  0028 A  UPI_C42_instructions 001F C  
+verPW . . . . . . .  005A C  
+
+ASSEMBLY COMPLETE,   NO ERRORS
