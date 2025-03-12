@@ -278,8 +278,8 @@ Result:         .BYTE 8
         .DW LWRD(_VAR)                ;; = 0000
         .DW HWRD(_VAR)                ;; = 0000
 
-        .DW 0-1<<3|high(Address)&1    ;= fffe  
-        .DW (0-1<0)<<3|high(Address)&1;= fffe  
+        .DW 0-1<<3|high(Address)&1    ;= fff8  
+        .DW (0-1<0)<<3|high(Address)&1;= 0008  
 
         .DW 0-1<<3|2&1                ;= fff8  
         .DW (0-1<<3)|(2&1)            ;= fff8  
