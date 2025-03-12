@@ -26,7 +26,7 @@
 .SET    _MSET_MASK      =       ~ ((1 << 0) | (1 << 1) | (1 << 2))  ; =$F8
         .DB     _MSET_MASK
          
-.SET    _MSET_MASK      =       ( ~ (1 << 0) | (1 << 1) | (1 << 2)) ; =$F8
+.SET    _MSET_MASK      =       ( ~ (1 << 0) | (1 << 1) | (1 << 2)) ; =$FE
         .DB     _MSET_MASK
 
 .SET    _MSET_MASK      =          ((1 << 0) | (1 << 1) | (1 << 2)) ; =$07
@@ -79,8 +79,8 @@
 
 .EQU    PORTA_MASK      =       NOT (SCR_LED OR CAP_LED OR NUM_LED OR KYBCLK OR KYBDAT) AND $00FF    ;= $C2
 
-Portinittbl:    .DB     PORTA_MASK, $00, $00, $FF ;PORTA .. PORTD                            ;= C2, ..
-                .DB     NOT PORTA_MASK, $00, $01  ;DDRA .. DDRC                              ;= 3D, ..
+Portinittbl:    .DB     PORTA_MASK, $00, $00, $FF ;PORTA .. PORTD                                    ;= C2, ..
+                .DB     NOT PORTA_MASK, $00, $01  ;DDRA .. DDRC                                      ;= 3D, ..
 
 ;----------------------------------------------------------------------
 ;  7      6         5         4         3        2       1       0
@@ -98,10 +98,10 @@ Portinittbl:    .DB     PORTA_MASK, $00, $00, $FF ;PORTA .. PORTD               
 .SET    _MSET_MASK      =       NOT ((1 SHL _MSET1_) | (1 SHL _MSET2_) | (1 SHL _MSET3_)) ; =$F8
                 .DB     _MSET_MASK
 
-.SET    _MSET_MASK      =        ((1 SHL _MSET1_) | (1 SHL _MSET2_) | (1 SHL _MSET3_)) ; =$07
+.SET    _MSET_MASK      =        ((1 SHL _MSET1_) | (1 SHL _MSET2_) | (1 SHL _MSET3_))    ; =$07
                 .DB     _MSET_MASK
 
-MF2_F0cmd3:     .DB     NOT ((1 SHL _MSET1_) | (1 SHL _MSET2_) | (1 SHL _MSET3_)) ; =$F8
+MF2_F0cmd3:     .DB     NOT ((1 SHL _MSET1_) | (1 SHL _MSET2_) | (1 SHL _MSET3_))         ; =$F8
 
 ;----------------------------------------------------------------------                                                    
 ;  7        6        5        4      3        2        1        0
@@ -196,12 +196,12 @@ Result:         .BYTE 8
 .EQU    NUM_LED         =       1 << _NUM_LED_  ;_NUM_LED_ byte value
 
 .SET    PORTA_MASK      =       ~ (SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF    ;= $C2
-.SET    PORTA_MASK      =       (SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF    ;= $C2
-.SET    PORTA_MASK      =       ~((SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF)    ;= $C2
-.SET    PORTA_MASK      =       ~((SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF)    ;= $C2
+.SET    PORTA_MASK      =       (SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF      ;= $3D
+.SET    PORTA_MASK      =       ~((SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF)   ;= $C2
+.SET    PORTA_MASK      =       ~((SCR_LED | CAP_LED | NUM_LED | KYBCLK | KYBDAT) & $00FF)   ;= $C2
 
-Portinittbl:    .DB     PORTA_MASK, $00, $00, $FF ;PORTA .. PORTD                            ;= C2, ..
-                .DB     ~ PORTA_MASK, $00, $01  ;DDRA .. DDRC                                ;= 3D, ..
+Portinittbl:    .DB     PORTA_MASK, $00, $00, $FF ;PORTA .. PORTD                            ;= $C2, ..
+                .DB     ~ PORTA_MASK, $00, $01  ;DDRA .. DDRC                                ;= $3D, ..
 
 
 ;----------------------------------------------------------------------
@@ -275,22 +275,22 @@ Result:         .BYTE 8
 .EQU _signResult=0
 
 .SET _VAR = ((-0-1>0)*0b1111|0-0)<<1|high(Address)&1
-        .DW LWRD(_VAR)            ;; = 0000
-        .DW HWRD(_VAR)            ;; = 0000
+        .DW LWRD(_VAR)                ;; = 0000
+        .DW HWRD(_VAR)                ;; = 0000
 
-        .DW 0-1<<3|high(Address)&1   ;= fffe
-        .DW (0-1<0)<<3|high(Address)&1   ;= fffe
+        .DW 0-1<<3|high(Address)&1    ;= fffe  
+        .DW (0-1<0)<<3|high(Address)&1;= fffe  
 
-        .DW 0-1<<3|2&1       ;= fff8
-        .DW (0-1<<3)|(2&1)   ;= fff8
+        .DW 0-1<<3|2&1                ;= fff8  
+        .DW (0-1<<3)|(2&1)            ;= fff8  
 
-        .DW 0-1<<3   ;= fffe
+        .DW 0-1<<3                    ;= fff8  
 
-        .DW 0-1<<3|high(Address)^5   ;= ffff
-        .DW 0-1<<3|2^5   ;= ffff
+        .DW 0-1<<3|high(Address)^5    ;= ffff  
+        .DW 0-1<<3|2^5                ;= ffff  
 
-        .DW 0-1<<3|high(Address)|4   ;= fffe
-        .DW 0-1<<3|2|4   ;= fffe
+        .DW 0-1<<3|high(Address)|4    ;= fffe  
+        .DW 0-1<<3|2|4                ;= fffe  
 
 #endif
 ; ----------------------------------------------------------
