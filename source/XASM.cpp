@@ -260,8 +260,8 @@ int main(int argc, char *argv[])
     exit(SYSERR_FNAME);
     }
  
-  // -----------------------------
-  // Perform the assemling process
+  // ------------------------------
+  // Perform the assembling process
   //
   assgn();       // Assign switches, defaults and allocate buffers
   pass1();       // Do the pass1
