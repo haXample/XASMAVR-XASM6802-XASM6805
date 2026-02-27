@@ -125,7 +125,7 @@ XASMAVR [/options] srcfile.asm | srcfile.s
 .TITLE text................................    	Title in page header  
 .SUBTTL text............................       	Subtitle in page header  
 .PAGELENGTH(number)......  			Lines per page   
-.PAGEWIDTH(number) .......   			Colums per page  
+.PAGEWIDTH(number) .......   			Columns per page  
 .EJECT........................................      	New listing page ejected ('FormFeed')  
 .SYMBOLS................................           	Symbol map appended in listing  
 .NOSYMBOLS ........................          	Listing without symbol map (default)  
