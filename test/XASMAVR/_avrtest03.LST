@@ -5,25 +5,25 @@ Test: The AVR(R) Instruction Set
 
                                     1   ;#define XASMAVR via commandline option '/DXASMAVR'
                                     2   ;----------------------------------,
-                                    3   #ifdef XASMAVR			   ;
+                                    3   #ifdef XASMAVR                     ;
                                     4    .TITLE Test: The AVR(R) Instruction Set
-                                    5    .PAGELENGTH(84)		   ;
-                                    6    .PAGEWIDTH(115)		   ;
-                                    7    .SYMBOLS			   ;
-                                    8    .MODEL WORD 			   ;
-                                    9    .DEVICE ATxmega384C3		   ;
-                                   10   #else				   ;
-                                   12   #endif ; XASMAVR		   ;
+                                    5    .PAGELENGTH(84)                   ;
+                                    6    .PAGEWIDTH(115)                   ;
+                                    7    .SYMBOLS                          ;
+                                    8    .MODEL WORD                       ;
+                                    9    .DEVICE ATxmega384C3              ;
+                                   10   #else                              ;
+                                   12   #endif ; XASMAVR                   ;
                                    13   ;----------------------------------'
                                    14   
                                    15   #ifndef XASMAVR
                                    23   #endif ; XASMAVR
                                    24   
  00000000                  :C      25   _instruction_set:
- 00000000  1f00            :C      26           adc     R16, R16		      
+ 00000000  1f00            :C      26           adc     R16, R16                      
  00000001  0f00            :C      27           add     R16, R16
  00000002  96cf            :C      28           adiw    R25:R24, 63
- 00000003  96cf            :C      29           adiw  	R24, 63
+ 00000003  96cf            :C      29           adiw    R24, 63
  00000004  2300            :C      30           and     R16, R16
  00000005  7f0f            :C      31           andi    R16, $FF
  00000006  9525            :C      32           asr     R18
@@ -80,7 +80,7 @@ Test: The AVR(R) Instruction Set
  0000003b  2700            :C      83           eor     R16, R16
  0000003c  0308            :C      84           fmul    R16, R16
  0000003d  0380            :C      85           fmuls   R16, R16
- 0000003e  0388            :C      86           fmulsu 	R16, R16
+ 0000003e  0388            :C      86           fmulsu  R16, R16
  0000003f  9509            :C      87           icall
  00000040  9409            :C      88           ijmp
  00000041  b72f            :C      89           in      R18, 63
@@ -111,7 +111,7 @@ Test: The AVR(R) Instruction Set
  00000058  0f22            :C     109           lsl     R18
  00000059  9526            :C     110           lsr     R18
  0000005a  2f00            :C     111           mov     R16, R16
- 0000005b  01de            :C     112           movw  	XH:XL, YH:YL
+ 0000005b  01de            :C     112           movw    XH:XL, YH:YL
  0000005c  01de            :C     113           movw    X, Y             
  0000005d  9f00            :C     114           mul     R16, R16
  0000005e  0200            :C     115           muls    R16, R16
@@ -122,7 +122,7 @@ Test: The AVR(R) Instruction Set
  00000063  bf2f            :C     120           out     63, R18
  00000064  912f            :C     121           pop     R18
  00000065  932f            :C     122           push    R18
-                                  123   ;;ha;;  rcall 	-10     ;; -10-(PCw+1) won't make any sense
+                                  123   ;;ha;;  rcall   -10     ;; -10-(PCw+1) won't make any sense
  00000066  dff5            :C     124           rcall   PC-10
  00000067  9508            :C     125           ret
  00000068  9518            :C     126           reti
